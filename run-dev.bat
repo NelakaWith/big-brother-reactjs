@@ -57,12 +57,12 @@ if not exist "frontend\node_modules" (
     cd ..
 )
 
-echo Choose how to run the development environment:
 echo.
-echo 1. Start with PM2 (Recommended - Both apps in background)
-echo 2. Start Backend only (Manual frontend start)
-echo 3. Start Frontend only (Manual backend start)
-echo 4. Start both in separate windows (CMD windows)
+echo Choose your preferred development setup:
+echo 1. Start with PM2 (Backend in PM2 + logs, Frontend in separate window)
+echo 2. Start both in separate CMD windows (Visible logs for both)
+echo 3. Start in current window (You'll see frontend logs here)
+echo 4. Quick start - separate windows with detailed logging
 echo 5. Exit
 echo.
 
@@ -109,6 +109,10 @@ if %ERRORLEVEL% neq 0 (
 
 REM Wait a moment for backend to start
 timeout /t 3 /nobreak >nul
+
+REM Start PM2 logs in a separate window
+echo Starting PM2 logs in separate window...
+start "Big Brother Backend Logs (PM2)" cmd /k "echo PM2 Backend Logs for Big Brother && echo ============================= && pm2 logs big-brother-backend"
 
 REM Start frontend manually (since PM2 has issues with npm on Windows)
 echo Starting frontend in development mode...

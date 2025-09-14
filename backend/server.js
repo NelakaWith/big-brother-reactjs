@@ -29,6 +29,13 @@ app.use(limiter);
 
 app.use(express.json());
 
+// Request logging middleware
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.log(`${timestamp}: ${req.method} ${req.url} - ${req.ip}`);
+  next();
+});
+
 // Authentication middleware
 const authenticate = (req, res, next) => {
   const credentials = basicAuth(req);
@@ -174,6 +181,8 @@ app.get("/api/logs/:appName", (req, res) => {
   );
 
   let logStream;
+  let logOutListener;
+  let logErrListener;
 
   pm2.connect((err) => {
     if (err) {
@@ -199,7 +208,8 @@ app.get("/api/logs/:appName", (req, res) => {
         return;
       }
 
-      bus.on("log:out", (packet) => {
+      // Create listener functions that we can properly remove later
+      logOutListener = (packet) => {
         if (packet.process.name === appName) {
           res.write(
             `data: ${JSON.stringify({
@@ -211,9 +221,9 @@ app.get("/api/logs/:appName", (req, res) => {
             })}\n\n`
           );
         }
-      });
+      };
 
-      bus.on("log:err", (packet) => {
+      logErrListener = (packet) => {
         if (packet.process.name === appName) {
           res.write(
             `data: ${JSON.stringify({
@@ -225,7 +235,10 @@ app.get("/api/logs/:appName", (req, res) => {
             })}\n\n`
           );
         }
-      });
+      };
+
+      bus.on("log:out", logOutListener);
+      bus.on("log:err", logErrListener);
 
       logStream = bus;
     });
@@ -233,10 +246,21 @@ app.get("/api/logs/:appName", (req, res) => {
 
   // Handle client disconnect
   req.on("close", () => {
-    if (logStream) {
-      logStream.removeAllListeners();
+    if (logStream && logOutListener && logErrListener) {
+      try {
+        // Remove specific listeners
+        logStream.removeListener("log:out", logOutListener);
+        logStream.removeListener("log:err", logErrListener);
+        console.log(`Cleaned up log listeners for ${appName}`);
+      } catch (error) {
+        console.error("Error cleaning up log stream:", error.message);
+      }
     }
-    pm2.disconnect();
+    try {
+      pm2.disconnect();
+    } catch (error) {
+      console.error("Error disconnecting PM2:", error.message);
+    }
   });
 });
 
