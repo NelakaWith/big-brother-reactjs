@@ -47,13 +47,11 @@ class ApiClient {
 
       // Handle 401 unauthorized - token might be expired
       if (response.status === 401) {
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("bb_access_token");
-          localStorage.removeItem("bb_refresh_token");
-          localStorage.removeItem("bb_user");
-          window.location.href = "/login";
-        }
-        throw new Error("Unauthorized");
+        // Create a custom 401 error that can be handled by Redux
+        const error = new Error("Unauthorized");
+        error.status = 401;
+        error.name = "UnauthorizedError";
+        throw error;
       }
 
       if (!response.ok) {

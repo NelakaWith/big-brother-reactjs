@@ -7,7 +7,7 @@ import Header from "./Header";
 import PrivateRoute from "./PrivateRoute";
 
 const Layout = ({ children, requireAuth = true }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, initialized } = useAuth();
 
   // For pages that don't require authentication (like login)
   if (!requireAuth) {

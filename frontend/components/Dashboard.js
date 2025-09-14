@@ -20,12 +20,24 @@ import { formatBytes } from "../lib/api";
 import { useAuth } from "../hooks/useAuth";
 
 const Dashboard = () => {
-  const { isAuthenticated, accessToken, loading, initialized } = useAuth();
+  const { isAuthenticated, accessToken, loading, initialized, forceLogout } =
+    useAuth();
   const [selectedApp, setSelectedApp] = useState(null);
   const [showLogs, setShowLogs] = useState(false);
   const [actionLoading, setActionLoading] = useState({});
   const [systemStats, setSystemStats] = useState({});
   const [connectionStatus, setConnectionStatus] = useState("connecting");
+
+  // Handle 401 errors by triggering logout
+  const handle401Error = (error) => {
+    if (error?.status === 401 || error?.name === "UnauthorizedError") {
+      console.log("401 Unauthorized detected, logging out...");
+      forceLogout();
+      return;
+    }
+    console.error("Dashboard fetch error:", error);
+    setConnectionStatus("error");
+  };
 
   // Debug logging
   useEffect(() => {
@@ -60,14 +72,11 @@ const Dashboard = () => {
     error: appsError,
     mutate: refreshApps,
   } = useSWR(shouldFetch ? "apps" : null, () => apiClient.getDashboardData(), {
-    refreshInterval: shouldFetch ? 30000 : 0, // Only poll when authenticated
+    refreshInterval: shouldFetch ? 60000 : 0, // Reduced from 30s to 60s to prevent rapid calls
     onSuccess: () => setConnectionStatus("connected"),
-    onError: (error) => {
-      console.error("Dashboard fetch error:", error);
-      setConnectionStatus("error");
-    },
-    errorRetryInterval: 10000,
-    errorRetryCount: 3,
+    onError: handle401Error,
+    errorRetryInterval: 15000, // Increased retry interval
+    errorRetryCount: 2, // Reduced retry count
   });
 
   // Fetch health data - only when authenticated
@@ -75,8 +84,9 @@ const Dashboard = () => {
     shouldFetch ? "health" : null,
     () => apiClient.getSystemHealth(),
     {
-      refreshInterval: shouldFetch ? 60000 : 0, // Only poll when authenticated
-      errorRetryInterval: 15000,
+      refreshInterval: shouldFetch ? 120000 : 0, // Increased from 60s to 120s
+      onError: handle401Error,
+      errorRetryInterval: 20000, // Increased retry interval
       errorRetryCount: 2,
     }
   );

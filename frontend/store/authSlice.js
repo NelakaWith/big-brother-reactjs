@@ -121,20 +121,28 @@ export const refreshToken = createAsyncThunk(
 export const initializeAuth = createAsyncThunk(
   "auth/initializeAuth",
   async () => {
+    console.log("initializeAuth: Starting initialization");
     const accessToken = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
     const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
     const userData = localStorage.getItem(STORAGE_KEYS.USER);
 
+    console.log("initializeAuth: Found tokens", {
+      hasAccessToken: !!accessToken,
+      hasRefreshToken: !!refreshToken,
+      hasUserData: !!userData,
+    });
+
     if (accessToken && refreshToken && userData) {
       try {
         const user = JSON.parse(userData);
+        console.log("initializeAuth: Successfully parsed user data", user);
         return {
           accessToken,
           refreshToken,
           user,
         };
       } catch (error) {
-        console.error("Error parsing stored user data:", error);
+        console.error("initializeAuth: Error parsing stored user data:", error);
         // Clear corrupted data
         localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
         localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
@@ -143,6 +151,7 @@ export const initializeAuth = createAsyncThunk(
       }
     }
 
+    console.log("initializeAuth: No complete auth data found");
     return null;
   }
 );
@@ -166,6 +175,7 @@ const authSlice = createSlice({
       state.loading = action.payload;
     },
     forceLogout: (state) => {
+      console.log("Auth: forceLogout called");
       // Clear all auth state
       state.isAuthenticated = false;
       state.user = null;
@@ -184,10 +194,12 @@ const authSlice = createSlice({
     builder
       // Initialize Auth
       .addCase(initializeAuth.pending, (state) => {
+        console.log("Auth: initializeAuth.pending");
         state.loading = true;
         state.initialized = false;
       })
       .addCase(initializeAuth.fulfilled, (state, action) => {
+        console.log("Auth: initializeAuth.fulfilled", action.payload);
         state.loading = false;
         state.initialized = true;
         if (action.payload) {
@@ -198,6 +210,7 @@ const authSlice = createSlice({
         }
       })
       .addCase(initializeAuth.rejected, (state) => {
+        console.log("Auth: initializeAuth.rejected");
         state.loading = false;
         state.initialized = true;
         state.isAuthenticated = false;
@@ -205,10 +218,12 @@ const authSlice = createSlice({
 
       // Login
       .addCase(loginUser.pending, (state) => {
+        console.log("Auth: loginUser.pending");
         state.loading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log("Auth: loginUser.fulfilled", action.payload);
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
@@ -217,6 +232,7 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
+        console.log("Auth: loginUser.rejected", action.payload);
         state.loading = false;
         state.isAuthenticated = false;
         state.user = null;
@@ -227,6 +243,7 @@ const authSlice = createSlice({
 
       // Logout
       .addCase(logoutUser.fulfilled, (state) => {
+        console.log("Auth: logoutUser.fulfilled");
         state.isAuthenticated = false;
         state.user = null;
         state.accessToken = null;
@@ -237,6 +254,7 @@ const authSlice = createSlice({
 
       // Refresh Token
       .addCase(refreshToken.fulfilled, (state, action) => {
+        console.log("Auth: refreshToken.fulfilled", action.payload);
         state.accessToken = action.payload.accessToken;
         if (action.payload.refreshToken) {
           state.refreshToken = action.payload.refreshToken;
@@ -244,6 +262,7 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(refreshToken.rejected, (state) => {
+        console.log("Auth: refreshToken.rejected - forcing logout");
         // Token refresh failed, force logout
         state.isAuthenticated = false;
         state.user = null;
