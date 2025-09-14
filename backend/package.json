@@ -2,6 +2,7 @@
   "name": "big-brother-backend",
   "version": "1.0.0",
   "description": "Big Brother monitoring dashboard backend API",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -27,7 +28,8 @@
     "fs-extra": "^11.1.1",
     "tail": "^2.2.6",
     "express-rate-limit": "^6.10.0",
-    "helmet": "^7.0.0"
+    "helmet": "^7.0.0",
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
