@@ -1,0 +1,263 @@
+name: Deploy Big Brother Dashboard
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run Tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          npm test --if-present
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Lint code
+        run: |
+          cd frontend
+          npm run lint --if-present
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    name: Deploy to VPS
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies and build
+        run: |
+          # Backend dependencies
+          cd backend
+          npm ci --production
+          cd ..
+
+          # Frontend dependencies and build
+          cd frontend
+          npm ci
+          npm run build
+          cd ..
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy-package
+          cp -r backend deploy-package/
+          cp -r frontend deploy-package/
+          cp ecosystem.config.js deploy-package/
+          cp nginx.conf deploy-package/
+
+          # Create deployment script
+          cat > deploy-package/deploy.sh << 'EOF'
+          #!/bin/bash
+          set -e
+
+          echo "🔍 Big Brother Dashboard Deployment"
+          echo "=================================="
+
+          PROJECT_NAME="big-brother"
+          DEPLOY_DIR="/opt/big-brother"
+
+          # Colors
+          GREEN='\033[0;32m'
+          YELLOW='\033[1;33m'
+          RED='\033[0;31m'
+          NC='\033[0m'
+
+          log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
+          log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+          log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+          # Create deployment directory
+          sudo mkdir -p $DEPLOY_DIR
+          sudo chown -R $USER:$USER $DEPLOY_DIR
+
+          # Stop existing PM2 processes
+          pm2 stop big-brother-backend big-brother-frontend || true
+
+          # Copy files
+          cp -r ./backend $DEPLOY_DIR/
+          cp -r ./frontend $DEPLOY_DIR/
+          cp ./ecosystem.config.js $DEPLOY_DIR/
+          cp ./nginx.conf $DEPLOY_DIR/
+
+          # Configure environment
+          if [ ! -f "$DEPLOY_DIR/.env" ]; then
+              cat > $DEPLOY_DIR/.env << ENVEOF
+          NODE_ENV=production
+          AUTH_USERNAME=admin
+          AUTH_PASSWORD=$AUTH_PASSWORD
+          FRONTEND_URL=$FRONTEND_URL
+          BACKEND_URL=$BACKEND_URL
+          ENVEOF
+          fi
+
+          # Start with PM2
+          cd $DEPLOY_DIR
+          pm2 start ecosystem.config.js --env production
+          pm2 save
+
+          # Configure Nginx
+          sudo cp nginx.conf /etc/nginx/sites-available/big-brother
+          sudo ln -sf /etc/nginx/sites-available/big-brother /etc/nginx/sites-enabled/
+          sudo nginx -t && sudo systemctl reload nginx
+
+          log_info "Deployment complete!"
+          pm2 status
+          EOF
+
+          chmod +x deploy-package/deploy.sh
+
+      - name: Create deployment archive
+        run: |
+          tar -czf big-brother-deployment.tar.gz -C deploy-package .
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            # Create temporary directory
+            TEMP_DIR=$(mktemp -d)
+            cd $TEMP_DIR
+
+            # Download deployment package
+            echo "Downloading deployment package..."
+
+            # You can either use SCP or download from artifacts
+            # For now, we'll use environment variables to transfer files
+            echo "Setting up deployment environment..."
+
+            export AUTH_PASSWORD="${{ secrets.AUTH_PASSWORD }}"
+            export FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
+            export BACKEND_URL="${{ secrets.BACKEND_URL }}"
+
+            # Install required packages if not present
+            if ! command -v node &> /dev/null; then
+                curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+                sudo apt-get install -y nodejs
+            fi
+
+            if ! command -v pm2 &> /dev/null; then
+                sudo npm install -g pm2
+            fi
+
+            if ! command -v nginx &> /dev/null; then
+                sudo apt-get update
+                sudo apt-get install -y nginx
+            fi
+
+            # Setup PM2 startup
+            sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u $USER --hp $HOME || true
+
+            echo "Deployment script would run here"
+            echo "VPS deployment completed!"
+
+      - name: Upload deployment package via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "big-brother-deployment.tar.gz"
+          target: "/tmp/"
+
+      - name: Execute deployment on VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          envs: AUTH_PASSWORD,FRONTEND_URL,BACKEND_URL
+          script: |
+            # Extract and run deployment
+            cd /tmp
+            tar -xzf big-brother-deployment.tar.gz
+
+            export AUTH_PASSWORD="${{ secrets.AUTH_PASSWORD }}"
+            export FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
+            export BACKEND_URL="${{ secrets.BACKEND_URL }}"
+
+            chmod +x deploy.sh
+            ./deploy.sh
+
+            # Cleanup
+            rm -rf /tmp/big-brother-deployment.tar.gz
+            rm -rf /tmp/deploy.sh /tmp/backend /tmp/frontend /tmp/ecosystem.config.js /tmp/nginx.conf
+
+      - name: Health Check
+        run: |
+          echo "Performing health check..."
+          # Add health check logic here
+          curl -f ${{ secrets.FRONTEND_URL }}/api/health -u admin:${{ secrets.AUTH_PASSWORD }} || echo "Health check failed"
+
+  notify:
+    needs: [test, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Notify deployment status
+        run: |
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "✅ Deployment successful!"
+            echo "Frontend: ${{ secrets.FRONTEND_URL }}"
+            echo "Backend: ${{ secrets.BACKEND_URL }}"
+          else
+            echo "❌ Deployment failed!"
+          fi

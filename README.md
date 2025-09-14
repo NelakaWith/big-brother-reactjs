@@ -86,34 +86,76 @@ npm run dev
 - Backend API: http://localhost:3001
 - Default credentials: `admin` / `admin123`
 
-### VPS Deployment
+### VPS Deployment with GitHub Actions
 
-1. **Upload Files**
+The dashboard includes automated deployment via GitHub Actions. Set up your VPS deployment in a few steps:
+
+#### 1. **Configure Repository Secrets**
+
+In your GitHub repository, go to Settings → Secrets and Variables → Actions, and add:
+
+```
+VPS_HOST          # Your VPS IP address (e.g., 192.168.1.100)
+VPS_USERNAME      # SSH username (e.g., ubuntu)
+VPS_SSH_KEY       # Your private SSH key content
+VPS_PORT          # SSH port (default: 22)
+AUTH_PASSWORD     # Dashboard admin password
+FRONTEND_URL      # Your domain (e.g., https://yourdomain.com)
+BACKEND_URL       # API URL (e.g., https://yourdomain.com/api)
+```
+
+#### 2. **Prepare Your VPS**
+
+```bash
+# SSH into your VPS
+ssh user@your-vps
+
+# Install prerequisites
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs nginx
+sudo npm install -g pm2
+
+# Setup deployment directory
+sudo mkdir -p /opt/big-brother
+sudo chown -R $USER:$USER /opt/big-brother
+
+# Setup PM2 startup
+pm2 startup
+```
+
+#### 3. **Deploy**
+
+Push to the `main` branch or manually trigger the workflow:
+
+```bash
+git push origin main
+```
+
+Or use manual deployment:
+
+- Go to Actions tab in GitHub
+- Select "Deploy Big Brother Dashboard"
+- Click "Run workflow"
+- Choose environment (production/staging)
+
+#### 4. **Available Workflows**
+
+- **`deploy.yml`**: Full deployment with testing, building, and VPS deployment
+- **`ci-cd.yml`**: Simple CI/CD pipeline for direct Git-based deployment
+
+### Manual VPS Setup (Alternative)
+
+If you prefer manual deployment, you can still upload files manually:
 
 ```bash
 # Upload to your VPS
 scp -r . user@your-vps:/tmp/big-brother
-```
 
-2. **Run Deployment Script**
-
-```bash
+# Setup manually
 ssh user@your-vps
 cd /tmp/big-brother
-chmod +x deploy.sh
-./deploy.sh
+# Follow manual installation steps
 ```
-
-3. **Follow Interactive Setup**
-   The script will:
-
-- Install Node.js, PM2, Nginx
-- Setup project files
-- Configure environment
-- Start services with PM2
-- Configure Nginx reverse proxy
-- Setup SSL (optional)
-- Configure firewall (optional)
 
 ## 📁 Project Structure
 
@@ -141,7 +183,10 @@ big-brother-reactjs/
 │   └── postcss.config.js  # PostCSS configuration
 ├── ecosystem.config.js     # PM2 ecosystem configuration
 ├── nginx.conf             # Nginx configuration template
-├── deploy.sh              # Linux deployment script
+├── .github/               # GitHub Actions workflows
+│   └── workflows/         # Deployment automation
+│       ├── deploy.yml     # Full deployment workflow
+│       └── ci-cd.yml      # Simple CI/CD pipeline
 ├── setup.bat              # Windows setup script
 └── README.md              # This file
 ```
@@ -257,17 +302,16 @@ pm2 start ecosystem.config.js --env production
 ### Deployment Commands
 
 ```bash
-# Update installation
-./deploy.sh update
+# GitHub Actions deployment (recommended)
+git push origin main              # Auto-deploy on push to main
 
-# View logs
-./deploy.sh logs
+# Manual GitHub Actions trigger
+# Go to GitHub Actions → Deploy Big Brother Dashboard → Run workflow
 
-# Check status
-./deploy.sh status
-
-# Restart services
-./deploy.sh restart
+# Direct PM2 management on VPS
+pm2 restart ecosystem.config.js  # Restart applications
+pm2 status                       # Check status
+pm2 logs                         # View logs
 ```
 
 ### Nginx Commands
