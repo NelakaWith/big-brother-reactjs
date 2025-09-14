@@ -1,8 +1,13 @@
 name: Deploy Big Brother Dashboard
 
+# This workflow only deploys when:
+# 1. Code is pushed to main branch (typically via PR merge)
+# 2. Manual workflow dispatch is triggered
+# Develop branch pushes will NOT trigger deployment
+
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -60,7 +65,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     name: Deploy to VPS
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    # Only deploy on direct pushes to main (which happen via PR merges) or manual workflow dispatch
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
 
     environment:
       name: ${{ github.event.inputs.environment || 'production' }}
