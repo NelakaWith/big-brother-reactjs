@@ -25,7 +25,8 @@ module.exports = {
         PORT: 3001,
         AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         AUTH_PASSWORD: process.env.AUTH_PASSWORD, // No fallback for production security
-        FRONTEND_URL: process.env.FRONTEND_URL || "https://your-domain.com",
+        FRONTEND_URL:
+          process.env.FRONTEND_URL || "https://bigbro.nelakawithanage.com",
       },
       log_date_format: "YYYY-MM-DD HH:mm Z",
       error_file: "./logs/big-brother-backend-error.log",
@@ -47,22 +48,21 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3006,
-        NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001",
+        NEXT_PUBLIC_BACKEND_URL: "https://bigbro.nelakawithanage.com/api",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
       env_development: {
         NODE_ENV: "development",
         PORT: 3000,
-        NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001",
+        NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001/api",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
       env_production: {
         NODE_ENV: "production",
         PORT: 3006,
-        NEXT_PUBLIC_BACKEND_URL:
-          process.env.BACKEND_URL || "https://bigbro.nelakawithanage.com/api",
+        NEXT_PUBLIC_BACKEND_URL: "https://bigbro.nelakawithanage.com/api",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
