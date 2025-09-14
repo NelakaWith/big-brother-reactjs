@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 const pm2 = require("pm2");
 const fs = require("fs-extra");
 const path = require("path");
+const os = require("os");
 const { Tail } = require("tail");
 
 const app = express();
@@ -321,10 +322,23 @@ app.get("/api/logs/:appName/historical", async (req, res) => {
 
     // Look for PM2 log files in multiple possible locations
     const possiblePaths = [
+      // Development paths (Windows/local)
       path.join("backend", "logs", `${appName}-out-0.log`),
       path.join("logs", `${appName}-out-0.log`),
+
+      // Production paths (Linux/VPS)
       path.join(process.cwd(), "backend", "logs", `${appName}-out-0.log`),
       path.join(process.cwd(), "logs", `${appName}-out-0.log`),
+      path.join("/opt/big-brother", "logs", `${appName}-out-0.log`),
+      path.join("/opt/big-brother", "backend", "logs", `${appName}-out-0.log`),
+
+      // PM2 default log locations
+      path.join(
+        require("os").homedir(),
+        ".pm2",
+        "logs",
+        `${appName}-out-0.log`
+      ),
     ];
 
     let logPath = null;
