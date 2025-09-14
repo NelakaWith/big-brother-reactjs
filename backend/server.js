@@ -283,13 +283,24 @@ app.get("/api/frontend-logs/:appName", async (req, res) => {
     const logContent = await fs.readFile(logPath, "utf8");
     const lines = logContent.split("\n").filter((line) => line.trim());
 
-    // Get last 100 lines
-    const recentLines = lines.slice(-100);
+    // Get number of lines from query parameter (default 500, max 2000)
+    const requestedLines = Math.min(parseInt(req.query.lines) || 500, 2000);
+
+    // Get offset for pagination (default 0)
+    const offset = parseInt(req.query.offset) || 0;
+
+    // Get the requested lines with pagination
+    const startIndex = Math.max(0, lines.length - requestedLines - offset);
+    const endIndex = lines.length - offset;
+    const recentLines = lines.slice(startIndex, endIndex);
 
     res.json({
       success: true,
       logs: recentLines,
       totalLines: lines.length,
+      requestedLines,
+      returnedLines: recentLines.length,
+      hasMore: startIndex > 0,
       file: logPath,
       timestamp: new Date().toISOString(),
     });
@@ -298,6 +309,101 @@ app.get("/api/frontend-logs/:appName", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to read log file",
+      message: error.message,
+    });
+  }
+});
+
+// Get historical PM2 logs from file system
+app.get("/api/logs/:appName/historical", async (req, res) => {
+  try {
+    const { appName } = req.params;
+
+    // Look for PM2 log files in multiple possible locations
+    const possiblePaths = [
+      path.join("backend", "logs", `${appName}-out-0.log`),
+      path.join("logs", `${appName}-out-0.log`),
+      path.join(process.cwd(), "backend", "logs", `${appName}-out-0.log`),
+      path.join(process.cwd(), "logs", `${appName}-out-0.log`),
+    ];
+
+    let logPath = null;
+    for (const possiblePath of possiblePaths) {
+      if (await fs.pathExists(possiblePath)) {
+        logPath = possiblePath;
+        break;
+      }
+    }
+
+    if (!logPath) {
+      return res.status(404).json({
+        success: false,
+        error: "PM2 log file not found",
+        searchedPaths: possiblePaths,
+      });
+    }
+
+    // Read log file content
+    const logContent = await fs.readFile(logPath, "utf8");
+    const lines = logContent.split("\n").filter((line) => line.trim());
+
+    // Get number of lines from query parameter (default 500, max 2000)
+    const requestedLines = Math.min(parseInt(req.query.lines) || 500, 2000);
+
+    // Get offset for pagination (default 0)
+    const offset = parseInt(req.query.offset) || 0;
+
+    // Get the requested lines with pagination
+    const startIndex = Math.max(0, lines.length - requestedLines - offset);
+    const endIndex = lines.length - offset;
+    const recentLines = lines.slice(startIndex, endIndex);
+
+    // Parse PM2 log format and extract useful information
+    const parsedLogs = recentLines.map((line, index) => {
+      // PM2 log format: 0|app_name | timestamp: message
+      const pm2Match = line.match(/^\d+\|[^|]+\|\s*(.+):\s*(.+)$/);
+      if (pm2Match) {
+        const [, timestamp, message] = pm2Match;
+        return {
+          id: startIndex + index,
+          type: "log",
+          level: message.toLowerCase().includes("error")
+            ? "error"
+            : message.toLowerCase().includes("warn")
+            ? "warn"
+            : "info",
+          message: message.trim(),
+          timestamp: timestamp.trim(),
+          raw: line,
+        };
+      }
+
+      // Fallback for non-PM2 format lines
+      return {
+        id: startIndex + index,
+        type: "log",
+        level: "info",
+        message: line,
+        timestamp: new Date().toISOString(),
+        raw: line,
+      };
+    });
+
+    res.json({
+      success: true,
+      logs: parsedLogs,
+      totalLines: lines.length,
+      requestedLines,
+      returnedLines: recentLines.length,
+      hasMore: startIndex > 0,
+      file: logPath,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Error reading historical PM2 logs:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to read PM2 log file",
       message: error.message,
     });
   }

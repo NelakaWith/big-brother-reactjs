@@ -47,9 +47,35 @@ export const api = {
   },
 
   // Get frontend logs
-  getFrontendLogs: async (appName) => {
+  getFrontendLogs: async (appName, lines = 500, offset = 0) => {
+    const params = new URLSearchParams({
+      lines: lines.toString(),
+      offset: offset.toString(),
+    });
+
     const response = await fetch(
-      `${API_BASE_URL}/api/frontend-logs/${appName}`,
+      `${API_BASE_URL}/api/frontend-logs/${appName}?${params}`,
+      {
+        ...defaultFetchOptions,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  },
+
+  // Get historical logs (for backend logs)
+  getHistoricalLogs: async (appName, lines = 500, offset = 0) => {
+    const params = new URLSearchParams({
+      lines: lines.toString(),
+      offset: offset.toString(),
+    });
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/logs/${appName}/historical?${params}`,
       {
         ...defaultFetchOptions,
       }
