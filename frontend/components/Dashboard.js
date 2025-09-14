@@ -17,31 +17,67 @@ import LogViewer from "./LogViewer";
 import ClientDate from "./ClientDate";
 import apiClient from "../utils/apiClient";
 import { formatBytes } from "../lib/api";
+import { useAuth } from "../hooks/useAuth";
 
 const Dashboard = () => {
+  const { isAuthenticated, accessToken, loading, initialized } = useAuth();
   const [selectedApp, setSelectedApp] = useState(null);
   const [showLogs, setShowLogs] = useState(false);
   const [actionLoading, setActionLoading] = useState({});
   const [systemStats, setSystemStats] = useState({});
   const [connectionStatus, setConnectionStatus] = useState("connecting");
 
-  // Fetch apps data with SWR
+  // Debug logging
+  useEffect(() => {
+    console.log("Dashboard - Redux Auth State:", {
+      isAuthenticated,
+      hasAccessToken: !!accessToken,
+      loading,
+      initialized,
+    });
+  }, [isAuthenticated, accessToken, loading, initialized]);
+
+  // Show loading while auth is initializing
+  if (!initialized || loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader className="h-6 w-6 animate-spin text-blue-500" />
+          <span className="text-lg text-gray-600">
+            {!initialized ? "Initializing..." : "Loading..."}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Only fetch data if authenticated
+  const shouldFetch = isAuthenticated;
+
+  // Fetch apps data with SWR - only when authenticated
   const {
     data: appsData,
     error: appsError,
     mutate: refreshApps,
-  } = useSWR("apps", () => apiClient.getDashboardData(), {
-    refreshInterval: 5000, // Poll every 5 seconds
+  } = useSWR(shouldFetch ? "apps" : null, () => apiClient.getDashboardData(), {
+    refreshInterval: shouldFetch ? 30000 : 0, // Only poll when authenticated
     onSuccess: () => setConnectionStatus("connected"),
-    onError: () => setConnectionStatus("error"),
+    onError: (error) => {
+      console.error("Dashboard fetch error:", error);
+      setConnectionStatus("error");
+    },
+    errorRetryInterval: 10000,
+    errorRetryCount: 3,
   });
 
-  // Fetch health data
+  // Fetch health data - only when authenticated
   const { data: healthData } = useSWR(
-    "health",
+    shouldFetch ? "health" : null,
     () => apiClient.getSystemHealth(),
     {
-      refreshInterval: 10000, // Poll every 10 seconds
+      refreshInterval: shouldFetch ? 60000 : 0, // Only poll when authenticated
+      errorRetryInterval: 15000,
+      errorRetryCount: 2,
     }
   );
 
@@ -214,7 +250,25 @@ const Dashboard = () => {
         </div>
 
         {/* Main content */}
-        {appsError ? (
+        {!shouldFetch ? (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              <h3 className="text-lg font-medium text-yellow-800">
+                Authentication Required
+              </h3>
+            </div>
+            <p className="mt-2 text-yellow-700">
+              Please log in to access the dashboard.
+            </p>
+            <p className="mt-1 text-sm text-gray-600">
+              Debug: loading={loading ? "true" : "false"}, isAuthenticated=
+              {isAuthenticated ? "true" : "false"}, hasAccessToken=
+              {accessToken ? "true" : "false"}, shouldFetch=
+              {shouldFetch ? "true" : "false"}
+            </p>
+          </div>
+        ) : appsError ? (
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />

@@ -4,7 +4,7 @@
  */
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import {
   Menu,
   X,

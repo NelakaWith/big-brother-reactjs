@@ -4,7 +4,7 @@
  */
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();

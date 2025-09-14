@@ -254,7 +254,7 @@ function Start-Setup {
         Write-Host "   Username: " -NoNewline -ForegroundColor White
         Write-Host "admin" -ForegroundColor Yellow
         Write-Host "   Password: " -NoNewline -ForegroundColor White
-        Write-Host "admin123" -ForegroundColor Yellow
+        Write-Host "TestPassword123!" -ForegroundColor Yellow
 
         Write-Info "`nUseful commands:"
         Write-Host "   .\setup.ps1 -Force     # Force reinstall all dependencies" -ForegroundColor Gray

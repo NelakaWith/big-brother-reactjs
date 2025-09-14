@@ -13,7 +13,7 @@ class ApiClient {
   // Get stored JWT token
   getToken() {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("token");
+      return localStorage.getItem("bb_access_token");
     }
     return null;
   }
@@ -48,8 +48,9 @@ class ApiClient {
       // Handle 401 unauthorized - token might be expired
       if (response.status === 401) {
         if (typeof window !== "undefined") {
-          localStorage.removeItem("token");
-          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("bb_access_token");
+          localStorage.removeItem("bb_refresh_token");
+          localStorage.removeItem("bb_user");
           window.location.href = "/login";
         }
         throw new Error("Unauthorized");
@@ -110,7 +111,7 @@ class ApiClient {
   }
 
   async logout() {
-    const refreshToken = localStorage.getItem("refreshToken");
+    const refreshToken = localStorage.getItem("bb_refresh_token");
     try {
       return await this.request("/auth/logout", {
         method: "POST",
@@ -207,11 +208,11 @@ class ApiClient {
 
   // System endpoints
   async getSystemHealth() {
-    return this.get("/system/health");
+    return this.get("/health");
   }
 
   async getSystemInfo() {
-    return this.get("/system/info");
+    return this.get("/health");
   }
 }
 

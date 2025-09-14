@@ -4,7 +4,7 @@
  */
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { Eye, EyeOff, LogIn, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
@@ -26,17 +26,17 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, loading, router]);
 
-  // Clear errors when component mounts or form data changes
-  useEffect(() => {
-    clearError();
-  }, [formData, clearError]);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    // Clear any existing error when user starts typing
+    if (error) {
+      clearError();
+    }
   };
 
   const handleSubmit = async (e) => {

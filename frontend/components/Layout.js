@@ -2,7 +2,7 @@
  * Layout Component
  * Main layout wrapper with authentication and navigation
  */
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import Header from "./Header";
 import PrivateRoute from "./PrivateRoute";
 

@@ -20,7 +20,7 @@ import {
   FileText,
   Bell,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import apiClient from "../utils/apiClient";
 import AppCard from "./AppCard";
 import LogViewer from "./LogViewer";
@@ -31,26 +31,40 @@ const Dashboard = () => {
   const [showLogs, setShowLogs] = useState(false);
   const [systemStats, setSystemStats] = useState({});
   const [connectionStatus, setConnectionStatus] = useState("connecting");
-  const { user } = useAuth();
+  const { user, isAuthenticated, accessToken } = useAuth();
 
-  // Fetch dashboard data with SWR
+  // Only fetch data if authenticated and has access token
+  const shouldFetch = isAuthenticated && accessToken;
+
+  // Fetch dashboard data with SWR - only when authenticated
   const {
     data: dashboardData,
     error: dashboardError,
     mutate: refreshDashboard,
     isLoading: dashboardLoading,
-  } = useSWR("dashboard", () => apiClient.getDashboardData(), {
-    refreshInterval: 5000, // Poll every 5 seconds
-    onSuccess: () => setConnectionStatus("connected"),
-    onError: () => setConnectionStatus("error"),
-  });
+  } = useSWR(
+    shouldFetch ? "dashboard" : null,
+    () => apiClient.getDashboardData(),
+    {
+      refreshInterval: shouldFetch ? 30000 : 0, // Only poll when authenticated
+      onSuccess: () => setConnectionStatus("connected"),
+      onError: (error) => {
+        console.error("Dashboard fetch error:", error);
+        setConnectionStatus("error");
+      },
+      errorRetryInterval: 10000,
+      errorRetryCount: 3,
+    }
+  );
 
-  // Fetch system health
+  // Fetch system health - only when authenticated
   const { data: healthData } = useSWR(
-    "health",
+    shouldFetch ? "health" : null,
     () => apiClient.getSystemHealth(),
     {
-      refreshInterval: 10000, // Poll every 10 seconds
+      refreshInterval: shouldFetch ? 60000 : 0, // Only poll when authenticated
+      errorRetryInterval: 15000,
+      errorRetryCount: 2,
     }
   );
 
@@ -86,6 +100,20 @@ const Dashboard = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
+
+  if (!shouldFetch) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center text-white">
+          <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Authentication Required</h2>
+          <p className="text-gray-400 mb-4">
+            Please log in to access the dashboard
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (dashboardError) {
     return (
