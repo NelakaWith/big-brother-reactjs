@@ -1,1 +1,503 @@
-# big-brother-reactjs
+# 🔍 Big Brother - VPS Monitoring Dashboard
+
+A comprehensive, ready-to-run Node.js + Next.js monitoring dashboard for VPS servers hosting multiple applications. Automatically detects and monitors all PM2-managed applications with real-time status updates, resource monitoring, and live log streaming.
+
+![Dashboard Screenshot](https://via.placeholder.com/800x400/1f2937/ffffff?text=Big+Brother+Dashboard)
+
+## ✨ Features
+
+### 🖥️ **Backend (Node.js + Express)**
+
+- **Automatic PM2 Detection**: Discovers all PM2-managed apps without configuration
+- **Real-time Monitoring**: CPU usage, memory consumption, uptime, restart counts
+- **Live Log Streaming**: Server-Sent Events (SSE) for real-time PM2 logs
+- **Frontend Log Access**: Reads logs from `/var/log/myapps/` directory
+- **App Control**: Restart and stop applications directly from dashboard
+- **Basic Authentication**: Secure access with username/password
+- **Rate Limiting**: Built-in protection against abuse
+- **Health Checks**: API endpoint for system health monitoring
+
+### 🎨 **Frontend (Next.js + React)**
+
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Real-time Updates**: Auto-refresh every 5 seconds using SWR
+- **Live Log Viewer**: Real-time log streaming with search and filtering
+- **Status Indicators**: Color-coded status for quick visual assessment
+- **Resource Monitoring**: Memory usage, CPU utilization, uptime tracking
+- **App Management**: Start, stop, restart applications from the UI
+- **Modern UI**: Built with Tailwind CSS for a clean, professional look
+- **Error Handling**: Graceful error handling and user feedback
+
+### ⚡ **Real-time Features**
+
+- **Live Data Polling**: Updates app status every 5 seconds
+- **SSE Log Streaming**: Real-time log viewing without page refresh
+- **Connection Status**: Visual indicator of backend connectivity
+- **Auto-scrolling Logs**: Automatically scroll to latest log entries
+- **Search & Filter**: Find specific log entries quickly
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 16+ and npm
+- PM2 (will be installed globally)
+- Linux/Ubuntu VPS (for production)
+
+### Local Development
+
+1. **Clone and Setup**
+
+```bash
+git clone <repository-url>
+cd big-brother-reactjs
+
+# For Windows
+setup.bat
+
+# For Linux/Mac
+chmod +x deploy.sh
+./deploy.sh help
+```
+
+2. **Manual Setup**
+
+```bash
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+
+# Start development servers
+cd ../backend
+npm run dev
+
+# In another terminal
+cd frontend
+npm run dev
+```
+
+3. **Access Dashboard**
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3001
+- Default credentials: `admin` / `admin123`
+
+### VPS Deployment
+
+1. **Upload Files**
+
+```bash
+# Upload to your VPS
+scp -r . user@your-vps:/tmp/big-brother
+```
+
+2. **Run Deployment Script**
+
+```bash
+ssh user@your-vps
+cd /tmp/big-brother
+chmod +x deploy.sh
+./deploy.sh
+```
+
+3. **Follow Interactive Setup**
+   The script will:
+
+- Install Node.js, PM2, Nginx
+- Setup project files
+- Configure environment
+- Start services with PM2
+- Configure Nginx reverse proxy
+- Setup SSL (optional)
+- Configure firewall (optional)
+
+## 📁 Project Structure
+
+```
+big-brother-reactjs/
+├── backend/                 # Express.js API server
+│   ├── server.js           # Main server file
+│   ├── package.json        # Backend dependencies
+│   └── ecosystem.config.js # PM2 configuration
+├── frontend/               # Next.js React app
+│   ├── pages/             # Next.js pages
+│   │   ├── index.js       # Main dashboard page
+│   │   └── _app.js        # App wrapper
+│   ├── components/        # React components
+│   │   ├── Dashboard.js   # Main dashboard component
+│   │   ├── AppCard.js     # App status card
+│   │   └── LogViewer.js   # Log viewing modal
+│   ├── lib/               # Utilities
+│   │   └── api.js         # API client and helpers
+│   ├── styles/            # CSS styles
+│   │   └── globals.css    # Global styles with Tailwind
+│   ├── package.json       # Frontend dependencies
+│   ├── next.config.js     # Next.js configuration
+│   ├── tailwind.config.js # Tailwind CSS config
+│   └── postcss.config.js  # PostCSS configuration
+├── ecosystem.config.js     # PM2 ecosystem configuration
+├── nginx.conf             # Nginx configuration template
+├── deploy.sh              # Linux deployment script
+├── setup.bat              # Windows setup script
+└── README.md              # This file
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```bash
+# Authentication
+AUTH_USERNAME=admin
+AUTH_PASSWORD=your-secure-password
+
+# URLs
+FRONTEND_URL=https://your-domain.com
+BACKEND_URL=https://your-domain.com/api
+
+# Development
+NODE_ENV=production
+```
+
+### PM2 Ecosystem
+
+The `ecosystem.config.js` file configures PM2 applications:
+
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: "big-brother-backend",
+      script: "./server.js",
+      // ... configuration
+    },
+    {
+      name: "big-brother-frontend",
+      script: "npm",
+      args: "start",
+      // ... configuration
+    },
+  ],
+};
+```
+
+### Nginx Configuration
+
+The dashboard works with Nginx as a reverse proxy:
+
+- Frontend served from port 3000
+- Backend API proxied from port 3001
+- SSL termination and security headers
+- Rate limiting and GZIP compression
+
+## 📡 API Reference
+
+### Endpoints
+
+| Endpoint                   | Method | Description               |
+| -------------------------- | ------ | ------------------------- |
+| `/api/apps`                | GET    | List all PM2 applications |
+| `/api/apps/:name`          | GET    | Get specific app details  |
+| `/api/logs/:name`          | GET    | Live log stream (SSE)     |
+| `/api/frontend-logs/:name` | GET    | Frontend logs from files  |
+| `/api/apps/:name/restart`  | POST   | Restart application       |
+| `/api/apps/:name/stop`     | POST   | Stop application          |
+| `/api/health`              | GET    | System health check       |
+
+### Response Format
+
+```javascript
+{
+  "success": true,
+  "apps": [
+    {
+      "name": "my-app",
+      "status": "online",
+      "memory": 52428800,
+      "cpu": 1.2,
+      "uptime": 3600000,
+      "restart_time": 0,
+      "port": 3000,
+      // ... more fields
+    }
+  ],
+  "count": 1,
+  "timestamp": "2023-12-07T10:30:00.000Z"
+}
+```
+
+## 🛠️ Management Commands
+
+### PM2 Commands
+
+```bash
+# Check status
+pm2 status
+
+# View logs
+pm2 logs
+
+# Restart dashboard
+pm2 restart big-brother-backend
+pm2 restart big-brother-frontend
+
+# Stop dashboard
+pm2 stop all
+
+# Start dashboard
+pm2 start ecosystem.config.js --env production
+```
+
+### Deployment Commands
+
+```bash
+# Update installation
+./deploy.sh update
+
+# View logs
+./deploy.sh logs
+
+# Check status
+./deploy.sh status
+
+# Restart services
+./deploy.sh restart
+```
+
+### Nginx Commands
+
+```bash
+# Test configuration
+sudo nginx -t
+
+# Reload configuration
+sudo systemctl reload nginx
+
+# Check status
+sudo systemctl status nginx
+
+# View logs
+sudo tail -f /var/log/nginx/error.log
+```
+
+## 🔒 Security Features
+
+### Authentication
+
+- Basic HTTP authentication for all API endpoints
+- Configurable username/password
+- Secure password generation in deployment script
+
+### Rate Limiting
+
+- API rate limiting (100 requests per 15 minutes)
+- Nginx-level rate limiting
+- Per-IP request throttling
+
+### Security Headers
+
+- X-Frame-Options: DENY
+- X-Content-Type-Options: nosniff
+- X-XSS-Protection: enabled
+- Strict-Transport-Security (HTTPS)
+
+### Network Security
+
+- Firewall configuration with UFW
+- Nginx reverse proxy (hides direct access to Node.js)
+- SSL/TLS encryption with Let's Encrypt
+
+## 📊 Monitoring & Logging
+
+### Application Logs
+
+- PM2 logs: `/var/log/pm2/`
+- Application logs: `/var/log/myapps/`
+- Nginx logs: `/var/log/nginx/`
+
+### Log Rotation
+
+- Automatic log rotation with logrotate
+- Daily rotation, 52-day retention
+- Compressed old logs
+
+### System Monitoring
+
+- Real-time resource usage tracking
+- Application health monitoring
+- Connection status indicators
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+**Backend Connection Failed**
+
+```bash
+# Check if backend is running
+pm2 status
+
+# Check backend logs
+pm2 logs big-brother-backend
+
+# Restart backend
+pm2 restart big-brother-backend
+```
+
+**Frontend Not Loading**
+
+```bash
+# Check frontend status
+pm2 logs big-brother-frontend
+
+# Check if Next.js built successfully
+cd frontend && npm run build
+
+# Restart frontend
+pm2 restart big-brother-frontend
+```
+
+**Nginx Issues**
+
+```bash
+# Test Nginx configuration
+sudo nginx -t
+
+# Check Nginx status
+sudo systemctl status nginx
+
+# View Nginx error logs
+sudo tail -f /var/log/nginx/error.log
+```
+
+**PM2 Issues**
+
+```bash
+# Kill and restart PM2
+pm2 kill
+pm2 start ecosystem.config.js --env production
+
+# Save PM2 configuration
+pm2 save
+
+# Setup PM2 startup
+pm2 startup
+```
+
+### Log Analysis
+
+**View Real-time Logs**
+
+```bash
+# All PM2 applications
+pm2 logs
+
+# Specific application
+pm2 logs big-brother-backend
+
+# System logs
+sudo journalctl -f -u nginx
+```
+
+**Check Resource Usage**
+
+```bash
+# System resources
+htop
+
+# PM2 monitoring
+pm2 monit
+
+# Disk usage
+df -h
+```
+
+## 🔧 Development
+
+### Local Development Setup
+
+1. **Environment Variables**
+
+```bash
+# .env.local (frontend)
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+NEXT_PUBLIC_AUTH_USERNAME=admin
+NEXT_PUBLIC_AUTH_PASSWORD=admin123
+```
+
+2. **Development Commands**
+
+```bash
+# Backend development
+cd backend
+npm run dev
+
+# Frontend development
+cd frontend
+npm run dev
+
+# Production build test
+cd frontend
+npm run build && npm start
+```
+
+### Adding New Features
+
+1. **Backend API Routes**: Add new routes in `backend/server.js`
+2. **Frontend Components**: Create components in `frontend/components/`
+3. **API Client**: Update `frontend/lib/api.js` for new endpoints
+4. **Styling**: Use Tailwind CSS classes in components
+
+## 📈 Performance Optimization
+
+### Memory Usage
+
+- Backend: ~50-100MB
+- Frontend: ~100-200MB
+- Total: <300MB (suitable for 1GB VPS)
+
+### Optimization Tips
+
+- Use `npm run build` for production frontend builds
+- Enable Nginx GZIP compression
+- Configure proper log rotation
+- Monitor with `pm2 monit`
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- **PM2** - Process manager for Node.js applications
+- **Next.js** - React framework for production
+- **Tailwind CSS** - Utility-first CSS framework
+- **SWR** - Data fetching library for React
+- **Express.js** - Web framework for Node.js
+
+## 📞 Support
+
+For issues and questions:
+
+1. Check the troubleshooting section
+2. Review the logs for error messages
+3. Create an issue in the repository
+4. Include system information and error logs
+
+---
+
+**Big Brother Dashboard** - Keep an eye on all your VPS applications! 👁️‍🗨️
