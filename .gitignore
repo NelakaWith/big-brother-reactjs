@@ -322,7 +322,7 @@ dist/
 out/
 
 # Package managers
-package-lock.json*
+# package-lock.json*  # Commented out - lock files should be committed for reproducible builds
 yarn.lock*
 pnpm-lock.yaml*
 
