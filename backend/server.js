@@ -269,14 +269,159 @@ app.get("/api/logs/:appName", (req, res) => {
 app.get("/api/frontend-logs/:appName", async (req, res) => {
   try {
     const { appName } = req.params;
-    const logPath = path.join("/var/log/myapps", `${appName}.log`);
 
-    // Check if log file exists
-    if (!(await fs.pathExists(logPath))) {
-      return res.status(404).json({
-        success: false,
-        error: "Log file not found",
-        path: logPath,
+    // Look for frontend log files in multiple possible locations
+    const possiblePaths = [
+      // Development paths (Windows/local)
+      path.join("frontend", "logs", `${appName}.log`),
+      path.join("logs", `${appName}-frontend.log`),
+      path.join("logs", `${appName}.log`),
+
+      // Production paths (Linux/VPS)
+      path.join(process.cwd(), "frontend", "logs", `${appName}.log`),
+      path.join(process.cwd(), "logs", `${appName}-frontend.log`),
+      path.join("/opt/big-brother", "logs", `${appName}-frontend.log`),
+      path.join("/opt/big-brother", "frontend", "logs", `${appName}.log`),
+
+      // PM2 log locations for frontend
+      path.join(
+        require("os").homedir(),
+        ".pm2",
+        "logs",
+        `${appName}-frontend-out-0.log`
+      ),
+      path.join("logs", `${appName}-frontend-out-0.log`),
+      path.join("backend", "logs", `${appName}-frontend-out-0.log`),
+
+      // Legacy paths
+      path.join("/var/log/myapps", `${appName}.log`),
+    ];
+
+    let logPath = null;
+    for (const possiblePath of possiblePaths) {
+      if (await fs.pathExists(possiblePath)) {
+        logPath = possiblePath;
+        break;
+      }
+    }
+
+    // If no log file found, try to get frontend logs from PM2 if available
+    if (!logPath) {
+      // Check if there's a PM2 frontend process running
+      return new Promise((resolve) => {
+        pm2.connect((err) => {
+          if (err) {
+            return resolve(
+              res.json({
+                success: true,
+                logs: [
+                  "No frontend log file found.",
+                  "Frontend logs are typically available only in production environments.",
+                  "For development, check the console output in your terminal or browser developer tools.",
+                  "PM2 connection failed - frontend may not be running via PM2.",
+                  `Searched paths: ${possiblePaths.join(", ")}`,
+                ],
+                totalLines: 5,
+                requestedLines: 5,
+                returnedLines: 5,
+                hasMore: false,
+                file: "No log file found",
+                timestamp: new Date().toISOString(),
+              })
+            );
+          }
+
+          pm2.list((err, list) => {
+            pm2.disconnect();
+
+            if (err) {
+              return resolve(
+                res.json({
+                  success: true,
+                  logs: [
+                    "No frontend log file found.",
+                    "Frontend logs are typically available only in production environments.",
+                    "For development, check the console output in your terminal or browser developer tools.",
+                    `Searched paths: ${possiblePaths.join(", ")}`,
+                  ],
+                  totalLines: 4,
+                  requestedLines: 4,
+                  returnedLines: 4,
+                  hasMore: false,
+                  file: "No log file found",
+                  timestamp: new Date().toISOString(),
+                })
+              );
+            }
+
+            // Check if frontend is running via PM2
+            const frontendProcess = list.find(
+              (proc) =>
+                proc.name === "big-brother-frontend" ||
+                proc.name.includes("frontend") ||
+                proc.name === appName
+            );
+
+            if (frontendProcess) {
+              return resolve(
+                res.json({
+                  success: true,
+                  logs: [
+                    `Frontend process found in PM2: ${frontendProcess.name}`,
+                    `Status: ${frontendProcess.pm2_env.status}`,
+                    `PID: ${frontendProcess.pid}`,
+                    `Uptime: ${Math.floor(
+                      frontendProcess.pm2_env.pm_uptime / 1000
+                    )}s`,
+                    `Memory: ${Math.floor(
+                      frontendProcess.monit.memory / 1024 / 1024
+                    )}MB`,
+                    `CPU: ${frontendProcess.monit.cpu}%`,
+                    "",
+                    "To view live frontend logs, use the 'Historical' tab for the frontend process,",
+                    "or check the PM2 logs directly with: pm2 logs " +
+                      frontendProcess.name,
+                    "",
+                    "For detailed frontend logs in development:",
+                    "- Check the browser developer console (F12)",
+                    "- Check the terminal where you started the frontend",
+                    "- Use 'Historical' logs tab if frontend is running via PM2",
+                  ],
+                  totalLines: 14,
+                  requestedLines: 14,
+                  returnedLines: 14,
+                  hasMore: false,
+                  file: "PM2 process information",
+                  timestamp: new Date().toISOString(),
+                })
+              );
+            } else {
+              return resolve(
+                res.json({
+                  success: true,
+                  logs: [
+                    "No frontend log file found.",
+                    "Frontend process not found in PM2.",
+                    "",
+                    "Frontend logs in development are typically found in:",
+                    "- Browser developer console (F12 → Console tab)",
+                    "- Terminal window where you started 'npm run dev'",
+                    "- PM2 logs if frontend is running via PM2",
+                    "",
+                    "For production environments, frontend logs will be available here.",
+                    `Searched paths: ${possiblePaths.slice(0, 5).join(", ")}`,
+                  ],
+                  totalLines: 10,
+                  requestedLines: 10,
+                  returnedLines: 10,
+                  hasMore: false,
+                  file: "No log file found",
+                  timestamp: new Date().toISOString(),
+                })
+              );
+            }
+          });
+        });
       });
     }
 
