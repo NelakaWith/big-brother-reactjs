@@ -46,21 +46,33 @@ A comprehensive, ready-to-run Node.js + Next.js monitoring dashboard for VPS ser
 
 ### Local Development
 
-1. **Clone and Setup**
+#### 🚀 **Quick Start (Windows)**
 
 ```bash
+# 1. Clone repository
 git clone <repository-url>
 cd big-brother-reactjs
 
-# For Windows
+# 2. One-time setup
 setup.bat
 
-# For Linux/Mac
-chmod +x deploy.sh
-./deploy.sh help
+# 3. Run development environment
+quick-start.bat
+# OR for more options
+run-dev.bat
 ```
 
-2. **Manual Setup**
+#### 📋 **Available Windows Scripts**
+
+- **`setup.bat`** - One-time setup (installs dependencies)
+- **`quick-start.bat`** - Simple startup (both apps in separate windows)
+- **`run-dev.bat`** - Advanced startup with multiple options:
+  - PM2 mode (recommended)
+  - Backend only
+  - Frontend only
+  - Separate windows mode
+
+#### 🛠️ **Manual Setup (Cross-platform)**
 
 ```bash
 # Install backend dependencies
@@ -80,11 +92,11 @@ cd frontend
 npm run dev
 ```
 
-3. **Access Dashboard**
+#### 🌐 **Access Dashboard**
 
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3001
-- Default credentials: `admin` / `admin123`
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:3001
+- **Default credentials**: `admin` / `admin123`
 
 ### VPS Deployment with GitHub Actions
 
@@ -188,6 +200,8 @@ big-brother-reactjs/
 │       ├── deploy.yml     # Full deployment workflow
 │       └── ci-cd.yml      # Simple CI/CD pipeline
 ├── setup.bat              # Windows setup script
+├── run-dev.bat            # Windows development runner (advanced)
+├── quick-start.bat        # Windows quick start script
 └── README.md              # This file
 ```
 
