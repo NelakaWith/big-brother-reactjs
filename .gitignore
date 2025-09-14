@@ -290,6 +290,8 @@ deploy-config.json
 *.db
 *.sqlite
 *.sqlite3
+backend/data/*.db*
+backend/data/backups/
 
 # Log files from applications
 /var/log/myapps/
