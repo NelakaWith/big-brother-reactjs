@@ -13,7 +13,7 @@ import {
   ChevronDown,
   Settings,
 } from "lucide-react";
-import { createLogStream, api } from "../lib/api";
+import apiClient from "../utils/apiClient";
 import ClientDate from "./ClientDate";
 
 const LogViewer = ({ appName, onClose, logType = "live" }) => {
@@ -45,11 +45,7 @@ const LogViewer = ({ appName, onClose, logType = "live" }) => {
 
     setLoadingMore(true);
     try {
-      const response = await api.getHistoricalLogs(
-        appName,
-        logLimit,
-        logs.length
-      );
+      const response = await apiClient.getHistoricalLogs(appName, logLimit, 0);
       if (response.success) {
         const newLogs = response.logs.map((log, index) => ({
           ...log,
@@ -73,7 +69,7 @@ const LogViewer = ({ appName, onClose, logType = "live" }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.getFrontendLogs(appName, logLimit, 0);
+      const response = await apiClient.getFrontendLogs(appName, logLimit, 0);
 
       if (response.success) {
         const formattedLogs = response.logs.map((line, index) => ({
@@ -101,7 +97,7 @@ const LogViewer = ({ appName, onClose, logType = "live" }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.getHistoricalLogs(appName, logLimit, 0);
+      const response = await apiClient.getHistoricalLogs(appName, logLimit, 0);
 
       if (response.success) {
         setLogs(response.logs);
@@ -129,7 +125,7 @@ const LogViewer = ({ appName, onClose, logType = "live" }) => {
         eventSourceRef.current.close();
       }
 
-      const eventSource = createLogStream(
+      const eventSource = apiClient.createLogStream(
         appName,
         (data) => {
           setLogs((prev) => [

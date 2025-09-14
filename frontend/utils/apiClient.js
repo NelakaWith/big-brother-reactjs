@@ -170,6 +170,55 @@ class ApiClient {
     return this.get(`/logs/application/${appId}`, params);
   }
 
+  // PM2 Historical logs
+  async getHistoricalLogs(appName, lines = 500, offset = 0) {
+    const params = { lines, offset };
+    return this.get(`/logs/${appName}/historical`, params);
+  }
+
+  // Frontend logs
+  async getFrontendLogs(appName, lines = 500, offset = 0) {
+    const params = { lines, offset };
+    return this.get(`/frontend-logs/${appName}`, params);
+  }
+
+  // Create SSE connection for live logs with JWT auth
+  createLogStream(appName, onMessage, onError, onOpen) {
+    const token = this.getToken();
+    if (!token) {
+      if (onError) onError(new Error("No authentication token available"));
+      return null;
+    }
+
+    // Create SSE connection with JWT token in URL
+    const url = `${this.baseURL}/logs/${appName}?token=${encodeURIComponent(
+      token
+    )}`;
+    const eventSource = new EventSource(url);
+
+    eventSource.onopen = (event) => {
+      console.log("SSE connection opened for", appName);
+      if (onOpen) onOpen(event);
+    };
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (onMessage) onMessage(data);
+      } catch (error) {
+        console.error("Error parsing SSE message:", error);
+        if (onError) onError(error);
+      }
+    };
+
+    eventSource.onerror = (event) => {
+      console.error("SSE connection error for", appName, event);
+      if (onError) onError(event);
+    };
+
+    return eventSource;
+  }
+
   async createLog(data) {
     return this.post("/logs", data);
   }

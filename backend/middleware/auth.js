@@ -7,7 +7,21 @@ import userModel from "../models/User.js";
 export const authenticate = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    const token = authService.extractTokenFromHeader(authHeader);
+    let token = null;
+
+    // Try to extract token from Authorization header first
+    if (authHeader) {
+      token = authService.extractTokenFromHeader(authHeader);
+    }
+
+    // If no token in header, check query parameters (for SSE connections)
+    if (!token && req.query.token) {
+      token = req.query.token;
+    }
+
+    if (!token) {
+      throw new Error("No authentication token provided");
+    }
 
     // Verify token and get user info
     const user = authService.getUserFromToken(token);
