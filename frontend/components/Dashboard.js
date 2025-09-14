@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import AppCard from "./AppCard";
 import LogViewer from "./LogViewer";
+import ClientDate from "./ClientDate";
 import { api, formatBytes } from "../lib/api";
 
 const Dashboard = () => {
@@ -146,7 +147,7 @@ const Dashboard = () => {
 
               {/* System time */}
               <div className="text-sm text-gray-500">
-                {new Date().toLocaleString()}
+                <ClientDate format="full" />
               </div>
             </div>
           </div>
@@ -259,7 +260,7 @@ const Dashboard = () => {
               </h2>
               <div className="text-sm text-gray-500">
                 Last updated:{" "}
-                {new Date(appsData.timestamp).toLocaleTimeString()}
+                <ClientDate date={appsData.timestamp} format="time" />
               </div>
             </div>
 

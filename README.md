@@ -71,6 +71,21 @@ run-dev.bat
   - Backend only
   - Frontend only
   - Separate windows mode
+- **`clear-ports.bat`** - Clear occupied ports (3000, 3001) when apps won't start
+
+#### 🚨 **Troubleshooting - Port Issues**
+
+If you get "port already in use" errors:
+
+```bash
+# Quick fix - Clear default ports
+clear-ports.bat
+
+# Manual commands
+netstat -aon | findstr :3000    # Check what's using port 3000
+taskkill /f /pid PROCESS_ID     # Kill specific process
+pm2 stop all                   # Stop all PM2 processes
+```
 
 #### 🛠️ **Manual Setup (Cross-platform)**
 
@@ -202,6 +217,7 @@ big-brother-reactjs/
 ├── setup.bat              # Windows setup script
 ├── run-dev.bat            # Windows development runner (advanced)
 ├── quick-start.bat        # Windows quick start script
+├── clear-ports.bat        # Windows port cleaner utility
 └── README.md              # This file
 ```
 

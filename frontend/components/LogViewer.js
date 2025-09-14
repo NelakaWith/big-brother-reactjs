@@ -10,6 +10,7 @@ import {
   Loader,
 } from "lucide-react";
 import { createLogStream, api } from "../lib/api";
+import ClientDate from "./ClientDate";
 
 const LogViewer = ({ appName, onClose, logType = "live" }) => {
   const [logs, setLogs] = useState([]);
@@ -147,12 +148,18 @@ const LogViewer = ({ appName, onClose, logType = "live" }) => {
     }
   };
 
+  // Helper function to format date consistently
+  const formatDateForDownload = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toISOString().replace("T", " ").substring(0, 19);
+  };
+
   // Download logs
   const downloadLogs = () => {
     const logText = filteredLogs
       .map(
         (log) =>
-          `[${new Date(log.timestamp).toLocaleString()}] ${
+          `[${formatDateForDownload(log.timestamp)}] ${
             log.level?.toUpperCase() || "INFO"
           }: ${log.message}`
       )
@@ -286,7 +293,7 @@ const LogViewer = ({ appName, onClose, logType = "live" }) => {
                       className="flex items-start space-x-2 text-sm hover:bg-white p-1 rounded"
                     >
                       <span className="text-gray-500 font-mono text-xs whitespace-nowrap">
-                        {new Date(log.timestamp).toLocaleTimeString()}
+                        <ClientDate date={log.timestamp} format="time" />
                       </span>
                       <span
                         className={`font-semibold uppercase text-xs ${getLogLevelColor(
