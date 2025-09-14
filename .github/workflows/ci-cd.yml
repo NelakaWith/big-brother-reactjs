@@ -17,18 +17,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: "npm"
 
       - name: Install and test backend
         run: |
           cd backend
-          npm ci
+          npm install
           npm test --if-present
 
       - name: Install and build frontend
         run: |
           cd frontend
-          npm ci
+          npm install
           npm run build
           npm run lint --if-present
 
@@ -49,6 +48,6 @@ jobs:
           script: |
             cd /opt/big-brother
             git pull origin main
-            cd backend && npm ci --production
-            cd ../frontend && npm ci && npm run build
+            cd backend && npm install --production
+            cd ../frontend && npm install && npm run build
             pm2 restart ecosystem.config.js --env production
