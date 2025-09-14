@@ -34,16 +34,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
+          cache: "npm"
 
       - name: Install backend dependencies
         run: |
           cd backend
-          npm install
+          npm ci
 
       - name: Install frontend dependencies
         run: |
           cd frontend
-          npm install
+          npm ci
 
       - name: Run backend tests
         run: |
@@ -78,17 +79,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
+          cache: "npm"
 
       - name: Install dependencies and build
         run: |
           # Backend dependencies
           cd backend
-          npm install --production
+          npm ci --production
           cd ..
 
           # Frontend dependencies and build
           cd frontend
-          npm install
+          npm ci
           npm run build
           cd ..
 
