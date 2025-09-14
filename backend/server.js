@@ -18,8 +18,10 @@ import {
   logsRoutes,
   frontendLogsRoutes,
   healthRoutes,
+  authRoutes,
+  databaseRoutes,
 } from "./routes/index.js";
-import { logService, pm2Service } from "./services/index.js";
+import { logService, pm2Service, databaseService } from "./services/index.js";
 
 // Validate configuration
 try {
@@ -27,6 +29,15 @@ try {
   console.log("✅ Configuration validated successfully");
 } catch (error) {
   console.error("❌ Configuration validation failed:", error.message);
+  process.exit(1);
+}
+
+// Initialize database
+try {
+  await databaseService.initialize();
+  console.log("✅ Database initialized successfully");
+} catch (error) {
+  console.error("❌ Database initialization failed:", error.message);
   process.exit(1);
 }
 
@@ -48,6 +59,9 @@ app.use(requestLogger);
 // Public health check (no authentication required)
 app.use("/api/health", healthRoutes);
 
+// Public authentication routes (no authentication required)
+app.use("/api/auth", authRoutes);
+
 // Authentication middleware for all other API routes
 app.use("/api", authenticate);
 
@@ -55,6 +69,7 @@ app.use("/api", authenticate);
 app.use("/api/apps", appsRoutes);
 app.use("/api/logs", logsRoutes);
 app.use("/api/frontend-logs", frontendLogsRoutes);
+app.use("/api/database", databaseRoutes);
 
 // Root endpoint
 app.get("/", (req, res) => {
@@ -66,6 +81,8 @@ app.get("/", (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       health: "/api/health",
+      auth: "/api/auth",
+      database: "/api/database",
       apps: "/api/apps",
       logs: "/api/logs/:appName",
       historicalLogs: "/api/logs/:appName/historical",
@@ -89,6 +106,9 @@ const gracefulShutdown = (signal) => {
 
   // Disconnect from PM2
   pm2Service.disconnect();
+
+  // Close database connection
+  databaseService.close();
 
   // Close server
   server.close(() => {
@@ -125,12 +145,8 @@ const server = app.listen(CONFIG.server.port, CONFIG.server.host, () => {
   console.log("=====================================");
   console.log(`📡 Server: http://${CONFIG.server.host}:${CONFIG.server.port}`);
   console.log(`🌍 Environment: ${CONFIG.server.env}`);
-  console.log(
-    `🔐 Auth: ${CONFIG.auth.username}/${CONFIG.auth.password.replace(
-      /./g,
-      "*"
-    )}`
-  );
+  console.log(`🔐 Auth: JWT-based authentication`);
+  console.log(`👤 Admin: ${CONFIG.auth.adminUsername}`);
   console.log(`🎯 Frontend: ${CONFIG.cors.origin}`);
   console.log(`📦 Version: ${CONFIG.app.version}`);
   console.log(`🕐 Started: ${new Date().toISOString()}`);

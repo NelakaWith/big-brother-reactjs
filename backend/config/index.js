@@ -16,8 +16,11 @@ export const CONFIG = {
 
   // Authentication configuration
   auth: {
-    username: process.env.AUTH_USERNAME || "admin",
-    password: process.env.AUTH_PASSWORD || "admin123",
+    jwtSecret: process.env.JWT_SECRET,
+    jwtAccessExpiry: process.env.JWT_ACCESS_EXPIRY || "30m",
+    jwtRefreshExpiry: process.env.JWT_REFRESH_EXPIRY || "7d",
+    adminUsername: process.env.ADMIN_USERNAME,
+    adminPasswordHash: process.env.ADMIN_PASSWORD_HASH,
     realm: "Big Brother Dashboard",
   },
 
@@ -45,6 +48,16 @@ export const CONFIG = {
   pm2: {
     maxRetries: parseInt(process.env.PM2_MAX_RETRIES) || 3,
     retryDelay: parseInt(process.env.PM2_RETRY_DELAY) || 1000,
+  },
+
+  // Database configuration
+  database: {
+    path: process.env.DATABASE_PATH || "./data/bigbrother.db",
+    backupPath: process.env.DATABASE_BACKUP_PATH || "./data/backups",
+    enableMetricsCollection: process.env.DB_ENABLE_METRICS !== "false",
+    metricsInterval: parseInt(process.env.DB_METRICS_INTERVAL) || 60000, // 1 minute
+    logRetentionDays: parseInt(process.env.DB_LOG_RETENTION_DAYS) || 30,
+    metricsRetentionDays: parseInt(process.env.DB_METRICS_RETENTION_DAYS) || 90,
   },
 
   // Log file paths
@@ -75,8 +88,16 @@ export const validateConfig = () => {
     errors.push("Invalid or missing PORT configuration");
   }
 
-  if (!CONFIG.auth.username || !CONFIG.auth.password) {
-    errors.push("Missing authentication credentials");
+  if (!CONFIG.auth.jwtSecret) {
+    errors.push("Missing JWT_SECRET configuration");
+  }
+
+  if (!CONFIG.auth.adminUsername) {
+    errors.push("Missing ADMIN_USERNAME configuration");
+  }
+
+  if (!CONFIG.auth.adminPasswordHash) {
+    errors.push("Missing ADMIN_PASSWORD_HASH configuration");
   }
 
   if (!CONFIG.cors.origin) {
