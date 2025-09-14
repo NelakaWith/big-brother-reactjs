@@ -185,18 +185,28 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Default Credentials Info */}
-          <div className="text-center text-xs text-gray-400 bg-gray-800 rounded-md p-3">
-            <p className="font-medium text-gray-300 mb-1">
-              Default Credentials:
-            </p>
-            <p>
-              Username: <span className="text-blue-400 font-mono">admin</span>
-            </p>
-            <p>
-              Password:{" "}
-              <span className="text-blue-400 font-mono">TestPassword123!</span>
-            </p>
+          {/* Setup Instructions */}
+          <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+            <div className="text-center">
+              <p className="font-medium text-gray-300 mb-2">
+                🔐 First Time Setup
+              </p>
+              <p className="text-sm text-gray-400 mb-3">
+                If this is your first login, you need to set up admin
+                credentials:
+              </p>
+              <ol className="text-sm text-gray-400 space-y-1 text-left max-w-sm mx-auto">
+                <li>
+                  1. Run{" "}
+                  <code className="text-blue-400 bg-gray-900 px-1 rounded">
+                    npm run setup
+                  </code>{" "}
+                  in the backend directory
+                </li>
+                <li>2. Follow the prompts to create your admin account</li>
+                <li>3. Use your custom credentials to login</li>
+              </ol>
+            </div>
           </div>
         </form>
       </div>

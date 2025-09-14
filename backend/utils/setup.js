@@ -120,7 +120,7 @@ export async function interactiveSetup() {
   const username = process.env.SETUP_USERNAME || "admin";
   console.log(`✅ Admin username: ${username}`);
 
-  // Get password from environment or prompt for security
+  // Get password from environment - REQUIRED for security
   const password = process.env.SETUP_PASSWORD;
 
   if (!password) {

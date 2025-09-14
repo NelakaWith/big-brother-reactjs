@@ -9,15 +9,15 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3001,
-        AUTH_USERNAME: "admin",
-        AUTH_PASSWORD: "admin123",
+        AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
+        AUTH_PASSWORD: process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
         FRONTEND_URL: "http://localhost:3000",
       },
       env_development: {
         NODE_ENV: "development",
         PORT: 3001,
-        AUTH_USERNAME: "admin",
-        AUTH_PASSWORD: "admin123",
+        AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
+        AUTH_PASSWORD: process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
         FRONTEND_URL: "http://localhost:3000",
       },
       env_production: {
@@ -48,15 +48,17 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 3000,
         NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001",
-        NEXT_PUBLIC_AUTH_USERNAME: "admin",
-        NEXT_PUBLIC_AUTH_PASSWORD: "admin123",
+        NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
+        NEXT_PUBLIC_AUTH_PASSWORD:
+          process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
       },
       env_development: {
         NODE_ENV: "development",
         PORT: 3000,
         NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001",
-        NEXT_PUBLIC_AUTH_USERNAME: "admin",
-        NEXT_PUBLIC_AUTH_PASSWORD: "admin123",
+        NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
+        NEXT_PUBLIC_AUTH_PASSWORD:
+          process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
       },
       env_production: {
         NODE_ENV: "production",

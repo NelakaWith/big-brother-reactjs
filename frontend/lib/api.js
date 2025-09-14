@@ -2,7 +2,10 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 const AUTH_USERNAME = process.env.NEXT_PUBLIC_AUTH_USERNAME || "admin";
-const AUTH_PASSWORD = process.env.NEXT_PUBLIC_AUTH_PASSWORD || "admin123";
+const AUTH_PASSWORD = process.env.NEXT_PUBLIC_AUTH_PASSWORD || "SETUP_REQUIRED";
+
+// Note: This legacy API client is deprecated in favor of JWT-based authentication
+// It should only be used for backward compatibility where necessary
 
 // Create auth header
 const createAuthHeader = () => {

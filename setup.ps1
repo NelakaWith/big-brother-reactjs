@@ -251,15 +251,21 @@ function Start-Setup {
         Write-Host "http://localhost:3001" -ForegroundColor Cyan
 
         Write-Info "`nDefault credentials:"
-        Write-Host "   Username: " -NoNewline -ForegroundColor White
-        Write-Host "admin" -ForegroundColor Yellow
-        Write-Host "   Password: " -NoNewline -ForegroundColor White
-        Write-Host "TestPassword123!" -ForegroundColor Yellow
+        Write-Host "   ⚠️  SECURITY NOTICE: No default credentials provided" -ForegroundColor Red
+        Write-Host "   📋 SETUP REQUIRED: Run backend setup to create admin account" -ForegroundColor Yellow
+        Write-Host "   📁 Instructions: See SECURITY.md for setup guidelines" -ForegroundColor Cyan
 
         Write-Info "`nUseful commands:"
         Write-Host "   .\setup.ps1 -Force     # Force reinstall all dependencies" -ForegroundColor Gray
         Write-Host "   .\run-dev.ps1          # Start development servers" -ForegroundColor Gray
-        Write-Host "   .\clear-ports.ps1      # Clear stuck ports" -ForegroundColor Gray
+        Write-Host "   .\clear-ports.bat      # Clear stuck ports" -ForegroundColor Gray
+
+        Write-Info "`n🔐 Security Setup Required:"
+        Write-Host "   Before first login, create admin credentials:" -ForegroundColor Yellow
+        Write-Host "   1. cd backend" -ForegroundColor Cyan
+        Write-Host "   2. npm run setup" -ForegroundColor Cyan
+        Write-Host "   3. Follow prompts to create secure admin account" -ForegroundColor Cyan
+        Write-Host "   4. Use your custom credentials to login" -ForegroundColor Cyan
 
     }
     catch {
