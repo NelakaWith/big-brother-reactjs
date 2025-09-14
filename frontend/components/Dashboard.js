@@ -15,7 +15,8 @@ import {
 import AppCard from "./AppCard";
 import LogViewer from "./LogViewer";
 import ClientDate from "./ClientDate";
-import { api, formatBytes } from "../lib/api";
+import apiClient from "../utils/apiClient";
+import { formatBytes } from "../lib/api";
 
 const Dashboard = () => {
   const [selectedApp, setSelectedApp] = useState(null);
@@ -29,16 +30,20 @@ const Dashboard = () => {
     data: appsData,
     error: appsError,
     mutate: refreshApps,
-  } = useSWR("apps", api.getApps, {
+  } = useSWR("apps", () => apiClient.getDashboardData(), {
     refreshInterval: 5000, // Poll every 5 seconds
     onSuccess: () => setConnectionStatus("connected"),
     onError: () => setConnectionStatus("error"),
   });
 
   // Fetch health data
-  const { data: healthData } = useSWR("health", api.healthCheck, {
-    refreshInterval: 10000, // Poll every 10 seconds
-  });
+  const { data: healthData } = useSWR(
+    "health",
+    () => apiClient.getSystemHealth(),
+    {
+      refreshInterval: 10000, // Poll every 10 seconds
+    }
+  );
 
   // Handle app actions
   const handleAppAction = async (appName, action) => {

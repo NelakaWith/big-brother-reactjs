@@ -1,9 +1,10 @@
 import Head from "next/head";
-import Dashboard from "../components/Dashboard";
+import Layout from "../components/Layout";
+import Dashboard from "../components/DashboardNew";
 
 export default function Home() {
   return (
-    <div>
+    <Layout>
       <Head>
         <title>Big Brother - VPS Monitoring Dashboard</title>
         <meta
@@ -14,9 +15,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        <Dashboard />
-      </main>
-    </div>
+      <Dashboard />
+    </Layout>
   );
 }

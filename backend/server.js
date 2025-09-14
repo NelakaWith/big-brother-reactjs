@@ -20,6 +20,7 @@ import {
   healthRoutes,
   authRoutes,
   databaseRoutes,
+  dashboardRoutes,
 } from "./routes/index.js";
 import { logService, pm2Service, databaseService } from "./services/index.js";
 
@@ -66,6 +67,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", authenticate);
 
 // API Routes
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/apps", appsRoutes);
 app.use("/api/logs", logsRoutes);
 app.use("/api/frontend-logs", frontendLogsRoutes);
