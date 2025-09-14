@@ -246,9 +246,13 @@ function Start-Setup {
 
         Write-Info "`nApplication URLs:"
         Write-Host "   Frontend: " -NoNewline -ForegroundColor White
-        Write-Host "http://localhost:3000" -ForegroundColor Cyan
+        Write-Host "http://localhost:3000 (dev) / localhost:3006 (prod)" -ForegroundColor Cyan
         Write-Host "   Backend:  " -NoNewline -ForegroundColor White
         Write-Host "http://localhost:3001" -ForegroundColor Cyan
+
+        Write-Warning "`n⚠️  Port Configuration:"
+        Write-Host "   Development: Frontend uses port 3000" -ForegroundColor Gray
+        Write-Host "   Production:  Frontend uses port 3006 (to avoid conflicts)" -ForegroundColor Gray
 
         Write-Info "`nDefault credentials:"
         Write-Host "   ⚠️  SECURITY NOTICE: No default credentials provided" -ForegroundColor Red

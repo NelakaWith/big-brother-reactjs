@@ -46,7 +46,7 @@ module.exports = {
       exec_mode: "fork",
       env: {
         NODE_ENV: "production",
-        PORT: 3000,
+        PORT: 3006,
         NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
@@ -60,9 +60,9 @@ module.exports = {
       },
       env_production: {
         NODE_ENV: "production",
-        PORT: 3000,
+        PORT: 3006,
         NEXT_PUBLIC_BACKEND_URL:
-          process.env.BACKEND_URL || "https://api.your-domain.com",
+          process.env.BACKEND_URL || "https://bigbro.nelakawithanage.com/api",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },

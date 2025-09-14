@@ -120,9 +120,11 @@ npm run dev
 
 #### 🌐 **Access Dashboard**
 
-- **Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:3000 (development) / http://localhost:3006 (production)
 - **Backend API**: http://localhost:3001
 - **Authentication**: JWT-based secure login system
+
+> **Note**: In production, the frontend runs on port 3006 to avoid conflicts with other applications that may use port 3000.
 
 ### VPS Deployment with GitHub Actions
 
