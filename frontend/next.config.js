@@ -4,7 +4,8 @@ const nextConfig = {
   swcMinify: true,
   output: "standalone",
   env: {
-    BACKEND_URL: process.env.BACKEND_URL || "http://localhost:3001",
+    NEXT_PUBLIC_BACKEND_URL:
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001/api",
     // Authentication will be handled via JWT tokens, no hardcoded credentials
   },
 };
