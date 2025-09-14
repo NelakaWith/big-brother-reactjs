@@ -2,10 +2,13 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 const AUTH_USERNAME = process.env.NEXT_PUBLIC_AUTH_USERNAME || "admin";
-const AUTH_PASSWORD = process.env.NEXT_PUBLIC_AUTH_PASSWORD || "SETUP_REQUIRED";
+// SECURITY: AUTH_PASSWORD removed from environment variables for security
+// This legacy API client should not be used - use JWT-based apiClient instead
+const AUTH_PASSWORD = "DEPRECATED_USE_JWT";
 
 // Note: This legacy API client is deprecated in favor of JWT-based authentication
 // It should only be used for backward compatibility where necessary
+// WARNING: Basic auth is insecure - migrate to JWT authentication
 
 // Create auth header
 const createAuthHeader = () => {

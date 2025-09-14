@@ -24,7 +24,7 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 3001,
         AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
-        AUTH_PASSWORD: process.env.AUTH_PASSWORD || "your-secure-password",
+        AUTH_PASSWORD: process.env.AUTH_PASSWORD, // No fallback for production security
         FRONTEND_URL: process.env.FRONTEND_URL || "https://your-domain.com",
       },
       log_date_format: "YYYY-MM-DD HH:mm Z",
@@ -49,16 +49,14 @@ module.exports = {
         PORT: 3000,
         NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
-        NEXT_PUBLIC_AUTH_PASSWORD:
-          process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
+        // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
       env_development: {
         NODE_ENV: "development",
         PORT: 3000,
         NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
-        NEXT_PUBLIC_AUTH_PASSWORD:
-          process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
+        // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
       env_production: {
         NODE_ENV: "production",
@@ -66,8 +64,7 @@ module.exports = {
         NEXT_PUBLIC_BACKEND_URL:
           process.env.BACKEND_URL || "https://api.your-domain.com",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
-        NEXT_PUBLIC_AUTH_PASSWORD:
-          process.env.AUTH_PASSWORD || "your-secure-password",
+        // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
       log_date_format: "YYYY-MM-DD HH:mm Z",
       error_file: "./logs/big-brother-frontend-error.log",
