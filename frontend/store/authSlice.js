@@ -16,6 +16,7 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async ({ username, password }, { rejectWithValue }) => {
     try {
+      console.log("loginUser: Attempting login for", username);
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
@@ -25,22 +26,36 @@ export const loginUser = createAsyncThunk(
       });
 
       const data = await response.json();
+      console.log("loginUser: Response received", {
+        status: response.status,
+        data,
+      });
 
       if (!response.ok) {
         throw new Error(data.message || "Login failed");
       }
 
+      // Extract tokens from the response structure
+      const { tokens, user } = data;
+      const { accessToken, refreshToken } = tokens;
+
+      console.log("loginUser: Storing tokens", {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+      });
+
       // Store tokens in localStorage
-      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, data.accessToken);
-      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, data.refreshToken);
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data.user));
+      localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+      localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
 
       return {
-        user: data.user,
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
+        user,
+        accessToken,
+        refreshToken,
       };
     } catch (error) {
+      console.error("loginUser: Login failed", error);
       return rejectWithValue(error.message);
     }
   }

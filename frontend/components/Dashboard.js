@@ -114,8 +114,8 @@ const Dashboard = () => {
 
   // Calculate system statistics
   useEffect(() => {
-    if (appsData?.apps) {
-      const apps = appsData.apps;
+    if (appsData?.data?.apps) {
+      const apps = appsData.data.apps;
       const stats = {
         totalApps: apps.length,
         onlineApps: apps.filter((app) => app.status === "online").length,
@@ -309,7 +309,7 @@ const Dashboard = () => {
               </span>
             </div>
           </div>
-        ) : appsData.apps.length === 0 ? (
+        ) : !appsData?.data?.apps || appsData.data.apps.length === 0 ? (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
@@ -325,16 +325,16 @@ const Dashboard = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
-                Applications ({appsData.apps.length})
+                Applications ({appsData?.data?.apps?.length || 0})
               </h2>
               <div className="text-sm text-gray-500">
                 Last updated:{" "}
-                <ClientDate date={appsData.timestamp} format="time" />
+                <ClientDate date={appsData?.timestamp} format="time" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {appsData.apps.map((app) => (
+              {appsData?.data?.apps?.map((app) => (
                 <AppCard
                   key={app.pm_id}
                   app={app}
