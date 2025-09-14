@@ -162,48 +162,34 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
-              <Eye className="h-8 w-8 text-blue-600" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Big Brother
-                </h1>
-                <p className="text-sm text-gray-500">
-                  VPS Monitoring Dashboard
-                </p>
-              </div>
+      {/* Dashboard header info */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-sm text-gray-600">VPS Monitoring Overview</p>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            {/* Connection status */}
+            <div className="flex items-center space-x-2">
+              {getConnectionStatusIcon()}
+              <span className="text-sm text-gray-600">
+                {getConnectionStatusText()}
+              </span>
             </div>
 
-            <div className="flex items-center space-x-4">
-              {/* Connection status */}
-              <div className="flex items-center space-x-2">
-                {getConnectionStatusIcon()}
-                <span className="text-sm text-gray-600">
-                  {getConnectionStatusText()}
-                </span>
-              </div>
-
-              {/* Refresh button */}
-              <button
-                onClick={() => refreshApps()}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors duration-200"
-                title="Refresh data"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </button>
-
-              {/* System time */}
-              <div className="text-sm text-gray-500">
-                <ClientDate format="full" />
-              </div>
-            </div>
+            {/* Refresh button */}
+            <button
+              onClick={() => refreshApps()}
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors duration-200"
+              title="Refresh data"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Stats Overview */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

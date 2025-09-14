@@ -5,6 +5,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../hooks/useAuth";
+import ClientDate from "./ClientDate";
 import {
   Menu,
   X,
@@ -67,7 +68,7 @@ const Header = () => {
   }
 
   return (
-    <header className="bg-gray-800 shadow-lg border-b border-gray-700">
+    <header className="bg-gray-800 shadow-lg border-b border-gray-700 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and main navigation */}
@@ -98,7 +99,12 @@ const Header = () => {
           </div>
 
           {/* User menu */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            {/* System time */}
+            <div className="text-sm text-gray-400">
+              <ClientDate format="MMM dd, HH:mm" />
+            </div>
+
             {/* Desktop user menu */}
             <div className="hidden md:ml-4 md:flex-shrink-0 md:flex md:items-center">
               <div className="ml-3 relative" ref={userMenuRef}>
