@@ -62,9 +62,9 @@ switch ($choice) {
         # Wait a moment for backend to start
         Start-Sleep -Seconds 3
 
-        # Start PM2 logs in a separate window
+        # Start PM2 logs in a separate window with real-time streaming
         Write-Host "Starting PM2 logs in separate window..." -ForegroundColor Green
-        Start-Process powershell -ArgumentList "-NoExit", "-Command", "Write-Host 'Big Brother Backend Logs' -ForegroundColor Green; Write-Host '======================' -ForegroundColor Yellow; Write-Host 'Monitoring: big-brother-backend' -ForegroundColor Cyan; Write-Host ''; pm2 logs big-brother-backend --raw" -WindowStyle Normal
+        Start-Process powershell -ArgumentList "-NoExit", "-File", "$PWD\logs-viewer.ps1" -WindowStyle Normal
 
         # Start frontend in separate window
         Write-Host "Starting frontend in separate window..." -ForegroundColor Green
