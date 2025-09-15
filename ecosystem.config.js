@@ -12,7 +12,8 @@ module.exports = {
         HOST: "127.0.0.1", // Bind to localhost only - nginx reverse proxy handles external access
         AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         AUTH_PASSWORD: process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
-        FRONTEND_URL: "http://localhost:3000",
+        FRONTEND_URL:
+          process.env.FRONTEND_URL || "https://bigbro.nelakawithanage.com",
       },
       env_development: {
         NODE_ENV: "development",
@@ -20,7 +21,7 @@ module.exports = {
         HOST: "127.0.0.1",
         AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         AUTH_PASSWORD: process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
-        FRONTEND_URL: "http://localhost:3000",
+        FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
       },
       env_production: {
         NODE_ENV: "production",
@@ -51,21 +52,26 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3006,
-        NEXT_PUBLIC_BACKEND_URL: "https://bigbro.nelakawithanage.com",
+        NEXT_PUBLIC_BACKEND_URL:
+          process.env.NEXT_PUBLIC_BACKEND_URL ||
+          "https://bigbro.nelakawithanage.com",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
       env_development: {
         NODE_ENV: "development",
         PORT: 3000,
-        NEXT_PUBLIC_BACKEND_URL: "http://localhost:3001",
+        NEXT_PUBLIC_BACKEND_URL:
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
       env_production: {
         NODE_ENV: "production",
         PORT: 3006,
-        NEXT_PUBLIC_BACKEND_URL: "https://bigbro.nelakawithanage.com",
+        NEXT_PUBLIC_BACKEND_URL:
+          process.env.NEXT_PUBLIC_BACKEND_URL ||
+          "https://bigbro.nelakawithanage.com",
         NEXT_PUBLIC_AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
