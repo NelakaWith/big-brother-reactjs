@@ -1,8 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-// API base URL
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+// API base URL (normalize NEXT_PUBLIC_BACKEND_URL so it can be origin-only or origin+/api)
+const API_BASE_URL = (() => {
+  const env = process.env.NEXT_PUBLIC_BACKEND_URL;
+  if (env) {
+    const trimmed = env.replace(/\/$/, "");
+    if (trimmed.endsWith("/api")) return trimmed;
+    return `${trimmed}/api`;
+  }
+
+  if (typeof window !== "undefined") return `${window.location.origin}/api`;
+  return "http://localhost:3001/api";
+})();
 
 // Storage keys
 const STORAGE_KEYS = {

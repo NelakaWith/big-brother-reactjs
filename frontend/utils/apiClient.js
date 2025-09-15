@@ -4,7 +4,25 @@
  */
 class ApiClient {
   constructor(
-    baseURL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001/api"
+    baseURL = (() => {
+      const env = process.env.NEXT_PUBLIC_BACKEND_URL;
+      if (env) {
+        // normalize trailing slash
+        const trimmed = env.replace(/\/$/, "");
+        // if env already points at /api, leave it
+        if (trimmed.endsWith("/api")) return trimmed;
+        // otherwise append /api
+        return `${trimmed}/api`;
+      }
+
+      // No env provided — if running in browser use current origin
+      if (typeof window !== "undefined") {
+        return `${window.location.origin}/api`;
+      }
+
+      // fallback for server-side / dev
+      return "http://localhost:3001/api";
+    })()
   ) {
     this.baseURL = baseURL;
   }
