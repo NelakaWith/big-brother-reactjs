@@ -3,11 +3,10 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   output: "standalone",
-  env: {
-    NEXT_PUBLIC_BACKEND_URL:
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001",
-    // Authentication will be handled via JWT tokens, no hardcoded credentials
-  },
+  // Do not provide a localhost fallback here. If NEXT_PUBLIC_BACKEND_URL is
+  // set in the build environment it will be embedded. Otherwise runtime code
+  // will resolve the backend origin (window.location.origin) and the client
+  // normalization ensures the final URL includes `/api`.
 };
 
 module.exports = nextConfig;
