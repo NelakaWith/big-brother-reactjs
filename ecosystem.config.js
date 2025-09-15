@@ -44,11 +44,10 @@ module.exports = {
     },
     {
       name: "big-brother-frontend",
-      // Run the Next standalone server file directly; PM2 will invoke the
-      // configured interpreter. This avoids accidentally invoking `npm` with
-      // the server path as a command.
-      script: ".next/standalone/server.js",
-      exec_interpreter: "node",
+      // Use npm to run a script that will prefer the Next standalone server
+      // if present, otherwise fall back to `next start`.
+      script: "npm",
+      args: "run start:standalone",
       cwd: "./frontend",
       instances: 1,
       exec_mode: "fork",
