@@ -64,7 +64,7 @@ switch ($choice) {
 
         # Start PM2 logs in a separate window with real-time streaming
         Write-Host "Starting PM2 logs in separate window..." -ForegroundColor Green
-        Start-Process powershell -ArgumentList "-NoExit", "-File", "$PWD\logs-viewer.ps1" -WindowStyle Normal
+        Start-Process powershell -ArgumentList "-NoExit", "-File", "$PWD\scripts\logs-viewer.ps1" -WindowStyle Normal
 
         # Start frontend in separate window
         Write-Host "Starting frontend in separate window..." -ForegroundColor Green
