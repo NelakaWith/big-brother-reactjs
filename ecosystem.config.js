@@ -9,6 +9,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3001,
+        HOST: "127.0.0.1", // Bind to localhost only - nginx reverse proxy handles external access
         AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         AUTH_PASSWORD: process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
         FRONTEND_URL: "http://localhost:3000",
@@ -16,6 +17,7 @@ module.exports = {
       env_development: {
         NODE_ENV: "development",
         PORT: 3001,
+        HOST: "127.0.0.1",
         AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         AUTH_PASSWORD: process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
         FRONTEND_URL: "http://localhost:3000",
@@ -23,6 +25,7 @@ module.exports = {
       env_production: {
         NODE_ENV: "production",
         PORT: 3001,
+        HOST: "127.0.0.1",
         AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         AUTH_PASSWORD: process.env.AUTH_PASSWORD, // No fallback for production security
         FRONTEND_URL:

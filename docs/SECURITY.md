@@ -4,6 +4,32 @@
 
 **NEVER use default credentials in production!**
 
+## Network Architecture & Security
+
+### Production Deployment Architecture
+
+```
+Internet → Cloudflare → Nginx (443/80) → Backend (127.0.0.1:3001)
+                     ↓
+                     Frontend (127.0.0.1:3006)
+```
+
+### Service Binding Strategy
+
+- **Backend**: Binds to `127.0.0.1:3001` (localhost only)
+- **Frontend**: Binds to `127.0.0.1:3006` (localhost only)
+- **Rationale**: Prevents direct external access, only nginx reverse proxy can reach services
+- **Security**: Eliminates risk of bypassing nginx security layer
+
+**Why not 0.0.0.0?** Binding to `0.0.0.0` would expose services on all network interfaces, allowing potential direct external access and bypassing our security controls.
+
+### Security Layers
+
+1. **Cloudflare**: DDoS protection, SSL termination, firewall rules
+2. **Nginx**: Reverse proxy, rate limiting, request filtering
+3. **Local Binding**: Services only accessible via localhost
+4. **Application**: JWT authentication, input validation, CORS protection
+
 ## First Time Setup
 
 ### 1. Set Up Admin Credentials
