@@ -12,9 +12,9 @@ const getAllowedOrigins = () => {
     "https://bigbro.nelakawithanage.com", // Production domain
   ];
 
-  // Add any additional origin from environment variable
+  // Add any additional origin from environment variable without mutating the original array
   if (CONFIG.cors.origin && !baseOrigins.includes(CONFIG.cors.origin)) {
-    baseOrigins.push(CONFIG.cors.origin);
+    return [...baseOrigins, CONFIG.cors.origin];
   }
 
   return baseOrigins;
@@ -30,8 +30,15 @@ export const corsMiddleware = cors({
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log(`🚫 CORS blocked origin: ${origin}`);
-      console.log(`✅ Allowed origins: ${allowedOrigins.join(", ")}`);
+      // Only log detailed CORS information in development
+      if (process.env.NODE_ENV === "development") {
+        console.log(`🚫 CORS blocked origin: ${origin}`);
+        console.log(`✅ Allowed origins: ${allowedOrigins.join(", ")}`);
+      } else {
+        // Generic production logging without exposing sensitive information
+        console.warn("CORS: Request blocked from unauthorized origin");
+      }
+
       callback(new Error("Not allowed by CORS"));
     }
   },
