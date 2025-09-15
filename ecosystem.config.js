@@ -44,10 +44,11 @@ module.exports = {
     },
     {
       name: "big-brother-frontend",
-      // Use node to run the standalone Next.js server in production builds.
-      // For development, the `env_development` section will use `npm start`.
-      script: "node",
-      args: ".next/standalone/server.js",
+      // Run the Next standalone server file directly; PM2 will invoke the
+      // configured interpreter. This avoids accidentally invoking `npm` with
+      // the server path as a command.
+      script: ".next/standalone/server.js",
+      exec_interpreter: "node",
       cwd: "./frontend",
       instances: 1,
       exec_mode: "fork",
@@ -61,9 +62,8 @@ module.exports = {
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
       env_development: {
-        // In development we keep using npm start (next start) for convenience.
-        script: "npm",
-        args: "start",
+        // In development we use `npm start` locally. To run with PM2 in
+        // development use: `pm2 start ecosystem.config.js --only big-brother-frontend --env development`
         NODE_ENV: "development",
         PORT: 3000,
         NEXT_PUBLIC_BACKEND_URL:
