@@ -33,7 +33,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "22.17.0"
           cache: "npm"
           cache-dependency-path: |
             backend/package-lock.json
@@ -81,7 +81,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "22.17.0"
           cache: "npm"
           cache-dependency-path: |
             backend/package-lock.json
@@ -199,7 +199,7 @@ jobs:
 
             # Install required packages if not present
             if ! command -v node &> /dev/null; then
-                curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+                curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
                 sudo apt-get install -y nodejs
             fi
 

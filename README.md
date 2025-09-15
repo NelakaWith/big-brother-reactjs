@@ -51,7 +51,7 @@ A comprehensive, ready-to-run Node.js + Next.js monitoring dashboard for VPS ser
 
 ### Prerequisites
 
-- Node.js 16+ and npm
+- Node.js 22.17.0+ and npm
 - PM2 (will be installed globally)
 - Linux/Ubuntu VPS (for production)
 
@@ -153,7 +153,7 @@ BACKEND_URL          # API URL (e.g., https://yourdomain.com/api)
 ssh user@your-vps
 
 # Install prerequisites
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs nginx
 sudo npm install -g pm2
 
