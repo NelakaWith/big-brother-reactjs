@@ -44,8 +44,10 @@ module.exports = {
     },
     {
       name: "big-brother-frontend",
-      script: "npm",
-      args: "start",
+      // Use node to run the standalone Next.js server in production builds.
+      // For development, the `env_development` section will use `npm start`.
+      script: "node",
+      args: ".next/standalone/server.js",
       cwd: "./frontend",
       instances: 1,
       exec_mode: "fork",
@@ -59,6 +61,9 @@ module.exports = {
         // SECURITY: Removed NEXT_PUBLIC_AUTH_PASSWORD - credentials should not be exposed to frontend
       },
       env_development: {
+        // In development we keep using npm start (next start) for convenience.
+        script: "npm",
+        args: "start",
         NODE_ENV: "development",
         PORT: 3000,
         NEXT_PUBLIC_BACKEND_URL:

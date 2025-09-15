@@ -45,6 +45,12 @@ try {
 // Create Express app
 const app = express();
 
+// When the app is behind a reverse proxy (NGINX, Cloudflare, etc.), enable
+// Express 'trust proxy' so libraries that rely on the client's IP (like
+// express-rate-limit) will use the X-Forwarded-For header instead of the
+// direct socket address.
+app.set("trust proxy", true);
+
 // Security middleware
 app.use(securityMiddleware);
 app.use(corsMiddleware);
