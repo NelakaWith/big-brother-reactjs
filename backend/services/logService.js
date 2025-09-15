@@ -257,13 +257,11 @@ class LogService {
    * Create SSE log stream response
    */
   createSSEResponse(res, appName) {
-    // Set SSE headers
+    // Set SSE headers; CORS origin and credentials are handled by the corsEchoMiddleware
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
-      "Access-Control-Allow-Origin": CONFIG.cors.origin,
-      "Access-Control-Allow-Credentials": "true",
     });
 
     // Send initial connection message
