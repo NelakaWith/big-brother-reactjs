@@ -78,5 +78,9 @@ export const corsEchoMiddleware = (req, res, next) => {
     }
   }
 
+  // Explicitly reject preflight OPTIONS requests from disallowed origins
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(403);
+  }
   return next();
 };
