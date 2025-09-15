@@ -70,11 +70,12 @@ pm2 stop all || true
 # Clone/update repository
 if [ -d ".git" ]; then
     print_status "Updating existing repository..."
-    git pull origin main
+    git fetch origin
+    git pull origin develop
 else
     print_status "Cloning repository..."
     # Replace with your actual repository URL
-    git clone https://github.com/NelakaWith/big-brother-reactjs.git .
+    git clone -b develop https://github.com/NelakaWith/big-brother-reactjs.git .
 fi
 
 # Install backend dependencies with compatible better-sqlite3
@@ -100,19 +101,22 @@ cd $DEPLOY_DIR
 
 # Setup environment variables
 print_status "Setting up environment variables..."
-if [ ! -f ".env" ]; then
-    print_warning "Creating .env file from template..."
-    cat > .env << EOF
+if [ ! -f "backend/.env" ]; then
+    print_warning "Creating backend/.env file from template..."
+    mkdir -p backend
+    cat > backend/.env << EOF
 # Production Environment Variables
 JWT_SECRET=$(openssl rand -base64 32)
 AUTH_USERNAME=admin
 AUTH_PASSWORD=\$2a\$10\$placeholder_hash_change_me
 DB_PATH=./database/big-brother.db
 FRONTEND_URL=https://$DOMAIN
-BACKEND_URL=https://$DOMAIN/api
 NODE_ENV=production
+PORT=3001
 EOF
-    print_warning "⚠️  Please update the AUTH_PASSWORD in .env file with a proper bcrypt hash!"
+    print_warning "⚠️  Please update the AUTH_PASSWORD in backend/.env file with a proper bcrypt hash!"
+else
+    print_success "Environment file already exists at backend/.env"
 fi
 
 # Create database directory
@@ -174,10 +178,11 @@ print_success "🎉 Deployment completed!"
 print_status "Your application should be available at: https://$DOMAIN"
 print_status ""
 print_status "Next steps:"
-print_status "1. Update AUTH_PASSWORD in .env with a bcrypt hash"
+print_status "1. Update AUTH_PASSWORD in backend/.env with a bcrypt hash"
 print_status "2. Run SSL setup if not completed: certbot --nginx -d $DOMAIN"
 print_status "3. Check PM2 status: pm2 list"
 print_status "4. Check logs: pm2 logs"
+print_status "5. If .env was moved from root, ensure backend/.env has all values"
 
 # Show final status
 print_status "Current PM2 processes:"

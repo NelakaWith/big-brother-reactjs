@@ -187,17 +187,21 @@ Or use manual deployment:
 
 ### Manual VPS Setup (Alternative)
 
-If you prefer manual deployment, you can still upload files manually:
+For direct deployment without GitHub Actions, use the deployment scripts:
 
 ```bash
-# Upload to your VPS
-scp -r . user@your-vps:/tmp/big-brother
+# Quick deployment from Windows
+cd scripts
+.\deploy-to-vps.ps1
 
-# Setup manually
+# Or SSH to VPS and deploy manually
 ssh user@your-vps
-cd /tmp/big-brother
-# Follow manual installation steps
+wget https://raw.githubusercontent.com/NelakaWith/big-brother-reactjs/develop/scripts/manual-deployment.sh
+chmod +x manual-deployment.sh
+sudo ./manual-deployment.sh
 ```
+
+📖 **For detailed deployment instructions and all available scripts, see [scripts/README.md](scripts/README.md)**
 
 ## 📁 Project Structure
 
