@@ -12,7 +12,7 @@ module.exports = {
         HOST: "127.0.0.1", // Bind to localhost only - nginx reverse proxy handles external access
         AUTH_USERNAME: process.env.AUTH_USERNAME || "admin",
         AUTH_PASSWORD: process.env.AUTH_PASSWORD || "SETUP_REQUIRED",
-        FRONTEND_URL: "http://localhost:3000",
+        FRONTEND_URL: "https://bigbro.nelakawithanage.com",
       },
       env_development: {
         NODE_ENV: "development",
