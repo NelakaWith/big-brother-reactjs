@@ -46,3 +46,41 @@ export const corsMiddleware = cors({
 });
 
 export default corsMiddleware;
+
+// Middleware that explicitly echoes back the validated origin and handles
+// preflight (OPTIONS) requests. This helps ensure any manual header writes
+// or proxies don't cause Access-Control-Allow-Origin to be a stale value.
+export const corsEchoMiddleware = (req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = getAllowedOrigins();
+
+  // Allow non-browser requests without Origin header
+  if (!origin) return next();
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader(
+      "Access-Control-Allow-Credentials",
+      String(CONFIG.cors.credentials)
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET,POST,PUT,DELETE,OPTIONS"
+    );
+
+    if (req.method === "OPTIONS") {
+      // Short-circuit preflight
+      return res.sendStatus(204);
+    }
+  }
+
+  // Explicitly reject preflight OPTIONS requests from disallowed origins
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(403);
+  }
+  return next();
+};

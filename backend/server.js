@@ -6,6 +6,7 @@ import express from "express";
 import { CONFIG, validateConfig } from "./config/index.js";
 import {
   corsMiddleware,
+  corsEchoMiddleware,
   securityMiddleware,
   rateLimitMiddleware,
   authenticate,
@@ -53,6 +54,8 @@ app.set("trust proxy", true);
 
 // Security middleware
 app.use(securityMiddleware);
+// Echo allowed origin and handle preflight before CORS middleware sets headers
+app.use(corsEchoMiddleware);
 app.use(corsMiddleware);
 app.use(rateLimitMiddleware);
 
